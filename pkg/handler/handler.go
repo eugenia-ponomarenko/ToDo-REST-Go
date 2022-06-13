@@ -1,27 +1,13 @@
 package handler
 
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/eugenia-ponomarenko/ToDo-REST-Go/pkg/service"
-
-	"github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
-
-	_ "github.com/eugenia-ponomarenko/ToDo-REST-Go/docs"
-)
+import "github.com/gin-gonic/gin"
 
 type Handler struct {
-	services *service.Service
-}
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
-
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	auth := router.Group("/auth")
 	{
@@ -29,7 +15,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/sign-in", h.signIn)
 	}
 
-	api := router.Group("/api", h.userIdentity)
+	api := router.Group("/api")
 	{
 		lists := api.Group("/lists")
 		{
@@ -43,16 +29,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				items.POST("/", h.createItem)
 				items.GET("/", h.getAllItems)
+				items.GET("/:id", h.getItemById)
+				items.PUT("/:id", h.updateItem)
+				items.DELETE("/:id", h.deleteItem)
 			}
-		}
-
-		items := api.Group("items")
-		{
-			items.GET("/:id", h.getItemById)
-			items.PUT("/:id", h.updateItem)
-			items.DELETE("/:id", h.deleteItem)
 		}
 	}
 
 	return router
-}
+} 
