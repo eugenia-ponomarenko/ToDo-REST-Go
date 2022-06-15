@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	_ "github.com/lib/pq"
 	"github.com/eugenia-ponomarenko/ToDo-REST-Go"
 	"github.com/eugenia-ponomarenko/ToDo-REST-Go/pkg/handler"
