@@ -10,7 +10,7 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/joho/godotenv v1.3.0
-	github.com/lib/pq v1.0.0
+	github.com/lib/pq v1.10.6
 	github.com/magiconair/properties v1.8.2
 	github.com/pelletier/go-toml/v2 v2.0.2 // indirect
 	github.com/sirupsen/logrus v1.6.0
