@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/eugenia-ponomarenko/ToDo-REST-Go"
@@ -10,10 +14,18 @@ import (
 	"github.com/eugenia-ponomarenko/ToDo-REST-Go/pkg/service"
 	"github.com/spf13/viper"
 	"github.com/sirupsen/logrus"
-	"context"
-	"os/signal"
-	"syscall"
 )
+
+// @title Todo App API
+// @version 1.0
+// @description API Server for TodoList Application
+
+// @host 193.122.54.72:8000
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
@@ -43,7 +55,7 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(todo.Server)
-	go func () {
+	go func() {
 		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 			logrus.Fatalf("error occured while running http server: %s", err.Error())
 		}
@@ -53,7 +65,7 @@ func main() {
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-	<- quit
+	<-quit
 
 	logrus.Print("TodoApp Shutting Down")
 
