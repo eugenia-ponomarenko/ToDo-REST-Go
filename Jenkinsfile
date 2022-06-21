@@ -2,9 +2,7 @@ pipeline {
     agent any
     
     environment {
-        // AWS_ACCESS_KEY_ID        = credentials('TF_AWS_ACCESS_KEY_ID')
-        // AWS_SECRET_ACCESS_KEY    = credentials('TF_AWS_SECRET_ACCESS_KEY')
-        DB_PASSWORD              = 'qwerty'
+        DB_PASSWORD           = 'qwerty'
         TODO_KEY              = credentials('todo_key')
     }
     
@@ -37,13 +35,8 @@ pipeline {
         
         stage('Add Public IP to Ansible config'){
             steps{
-                script {
-                        sh '''#!/bin/bash
-                        cd ./Terraform
-                        Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'`
-                        sed -ie "s/Public_IP/$Public_IP/g" ../Ansible/inventory.yml 
-                        '''
-                }
+                sh "cd ./Terraform; export Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'` "
+                sh 'sed -ie "s/Public_IP/$Public_IP/g" ./Ansible/inventory.yml' 
             }
         }
         
@@ -55,7 +48,7 @@ pipeline {
         
         stage('Migrate DB'){
             steps{
-                sh 'migrate -path ./schema -database "postgres://postgres:$DB_PASSWORD@$Public_IP:5432/postgres?sslmode=disable" up'
+                sh 'migrate -path ./schema -database "postgres://postgres:$DB_PASSWORD@3.72.249.4:5432/postgres?sslmode=disable" up'
             }
         }
 
