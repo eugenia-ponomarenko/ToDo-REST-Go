@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
   todo-app:
-    build: ./
+    image: eugenia1p/todo_go_rest:22
     command: ./wait_for_postgres.sh db ./todo-app
     ports:
       - 8000:8000
