@@ -16,3 +16,10 @@
 
 .env
 .database
+
+# terraform
+.ssh
+.terraform
+.terraform.*
+*.tfstate.*
+*.tfstate
