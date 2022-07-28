@@ -1,4 +1,4 @@
-FROM golang:1.17.12-buster
+FROM golang:1.18-buster
 
 RUN go version
 ENV GOPATH=/
@@ -6,7 +6,7 @@ ENV GOPATH=/
 COPY ./ ./
 
 # install psql
-# RUN apt-get update
+RUN apt-get update
 RUN apt-get -y install postgresql-client
 
 # make wait-for-postgres.sh executable
