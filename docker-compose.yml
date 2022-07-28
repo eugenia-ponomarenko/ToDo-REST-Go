@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
   todo-app:
-    image: eugenia1p/todo_go_rest:22
+    image: eugenia1p/todo_go_rest:latest
     command: ./wait_for_postgres.sh db ./todo-app
     ports:
       - 8000:8000
@@ -15,7 +15,7 @@ services:
     restart: always
     image: postgres:latest
     volumes:
-    - ./.database/postgres/data:/var/lib/postgresql/data
+      - ./.database/postgres/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=qwerty
     ports:
