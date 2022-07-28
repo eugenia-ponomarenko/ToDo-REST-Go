@@ -1,49 +1,48 @@
 ---
 - hosts: all
   become: true
-
-
-#  ansible-playbook playbook.yml
+  remote_user: "ubuntu"
 
   tasks:
-    - name: Install aptitude
+    - name: Install dependencies for pip3
       apt:
-        name: aptitude
-        state: latest
-        update_cache: true
-
-    - name: Install required system packages
+        update_cache: yes
+        name: "{{ item }}"
+      with_items:
+        - build-essential
+        - python3-distutils
+        - python3-dev
+        - python3-setuptools
+        - python3-wheel
+      become: yes
+      
+    - name: Install pip3
       apt:
-        pkg:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
-          - python3-pip
-          - virtualenv
-          - python3-setuptools
-        state: latest
-        update_cache: true
+        update_cache: yes
+        name: python3-pip
+      become: yes
 
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+    - name: Install python docker sdk
+      shell: |
+        pip3 install docker
+      become: yes
 
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu focal stable
-        state: present
-
-    - name: Update apt and install docker-ce
+    - name: Install docker
       apt:
-        name: docker-ce
-        state: latest
-        update_cache: true
+        name: docker.io
+      become: yes
 
-    - name: Install Docker Module for Python
-      pip:
-        name: docker
+    - name: Start Docker
+      shell: |
+        systemctl start docker
+        systemctl enable docker
+      become: yes
+
+    - name: Add remote "ubuntu" user to "docker" group
+      user:
+        name: "ubuntu"
+        group: "docker"
+        append: yes
 
     - name: Update apt and install docker-compose
       apt:
