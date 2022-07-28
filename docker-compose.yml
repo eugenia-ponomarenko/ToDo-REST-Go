@@ -8,6 +8,8 @@ services:
       - 8000:8000
     depends_on:
       - db
+    environment:
+      - DB_PASSWORD=qwerty
 
   db:
     restart: always
