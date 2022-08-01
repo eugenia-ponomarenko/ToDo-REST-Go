@@ -34,7 +34,7 @@
 >![image](https://user-images.githubusercontent.com/71873090/182134709-8cd1264d-d729-4d8f-a65f-e14abe9aba6f.png)
 
 
-2. Add credentials
+2. Add credentials in **_Manage Jenkins >> Security >> Manage Credentials_**
     - AWS_TODO - as an **_AWS Credentials_** using the IAM User credentials that were created before
     - todo_key - as a **_Secret file_** with key pair file **todo_key.pem**
     - db_password - as a **_Secret file_** with password for DB
@@ -49,3 +49,38 @@
 
 3. And finally, create **pipeline** job and add Jenkinsfile as a **_Pipeline script form SCM_**. using your **github** credentials saved as a Jenkins credentials
 ![telegram-cloud-photo-size-2-5420578027445795973-y](https://user-images.githubusercontent.com/71873090/182135003-7ca4a601-760b-4436-a156-204e4f67f8ff.jpg)
+
+
+## Python script to save your Authentication Bearer token in AWS SSM Parameter Store
+    - With this script you can put token as a parameter in AWS SSM Parameter Store
+    - And get this parameter from the Parameter Store
+
+1. Create an IAM policy with the following permissions:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:PutParameter"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+2. And then create an IAM User for boto3 with this policy and **Access key - Programmatic access** access type
+3. Add credentials to ~/.aws/credentials file as:
+
+```
+[default]
+aws_access_key_id = AKIA************
+aws_secret_access_key = /vJ/0EjMJ**************
+```
+
+4. Change an **url** to your Public IP if you [deploy on remote](#deploying-on-remote) or leave the same one
+    
+5. Execute the **aws-ssm.py** script
