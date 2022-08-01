@@ -6,11 +6,12 @@ pipeline {
     }
     
     environment {
-        imageName = "eugenia1p/todo_rest"
+        registry = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
         DB_PASSWORD = credentials('db_password')
         TODO_KEY  = credentials('todo_key')
         Public_IP = ''
+        dockerImage = ''
     }
     
     stages {
@@ -74,7 +75,7 @@ pipeline {
             steps{
                 script {
                     sh '''
-                    sed -i -e "s#image: eugenia1p/todo_go_rest#image: $imageName#g" ./docker-compose.yml
+                    sed -i -e "s#image: eugenia1p/todo_go_rest#image: $registry#g" ./docker-compose.yml
                     sed -i -e "s/DB_PASSWORD=qwerty/DB_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
                     sed -i -e "s/POSTGRES_PASSWORD=qwerty/POSTGRES_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
                     '''
@@ -88,21 +89,29 @@ pipeline {
             }
         }
         
-        stage('Deploy our image') {
+        stage('Build docker image') {
             steps{
                 script {
-                    dockerImage = docker.build imageName
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER"    
                 }
             }
         }
         
-        stage('Push our image') {
+        stage('Push docker image') {
             steps{
-                withCredentials([usernamePassword(credentialsId: 'dockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"'
-                    sh 'docker push $imageName:latest; docker push $imageName:$BUILD_NUMBER'
+                script {
+                    docker.withRegistry( '', registryCredential ) {             
+                        dockerImage.push()
+                        dockerImage.push('latest')
+                    }
                 }
             }
+        }
+        
+        stage('Remove Unused docker image') {       
+            steps{         
+                sh "docker rmi $registry:$BUILD_NUMBER"       
+            }     
         }
         
         stage('Ansible-playbook'){
@@ -113,7 +122,13 @@ pipeline {
         
         stage('Migrate DB'){
             steps{
-                sh '/usr/local/bin/migrate -path ./schema -database "postgres://postgres:$DB_PASSWORD@$Public_IP:5432/postgres?sslmode=disable" up'
+                script {
+                    sh '''
+                    cd ./Terraform
+                    Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'`
+                    /usr/local/bin/migrate -path ../schema -database "postgres://postgres:$DB_PASSWORD@$Public_IP:5432/postgres?sslmode=disable" up
+                    '''
+                }
             }
         }
 
