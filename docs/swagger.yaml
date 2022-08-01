@@ -55,7 +55,7 @@ definitions:
     - password
     - username
     type: object
-host: 193.122.54.72:8000
+host: localhost:8000
 info:
   contact: {}
   description: API Server for TodoList Application
