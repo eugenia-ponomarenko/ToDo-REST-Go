@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        imageName = "eugenia1p/todo_go_rest"
+        imageName = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
         DB_PASSWORD = credentials('db_password')
         TODO_KEY  = credentials('todo_key')
@@ -27,7 +27,7 @@ pipeline {
 
         stage('Git clone'){
             steps{
-                git url: 'https://github.com/eugenia-ponomarenko/ToDo-REST-Go.git', credentialsId: 'github', branch: 'cd_pipeline'
+                git url: 'https://github.com/eugenia-ponomarenko/ToDo-REST-Go.git', credentialsId: 'github', branch: 'main'
             }
         }
         
@@ -46,44 +46,61 @@ pipeline {
                 }
             }
         }
-        
-        // stage('Create .env'){
-        //     steps {
-        //         sh 'echo "DB_PASSWORD=$DB_PASSWORD" >> .env'
-        //     }
-        // }
-        
-        // stage('Deploy our image') {
-        //     steps{
-        //         script {
-        //             dockerImage = docker.build imageName
-        //             docker.withRegistry('', "$registryCredential") {
-        //                 dockerImage.push("$BUILD_NUMBER")
-        //                 dockerImage.push('latest')
-        //             }
-        //         }
-        //     }
-        // }
 
         stage('Terraform apply'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_TODO',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
-                    sh "cd ./Terraform; terraform init"
                     sh "cd ./Terraform; terraform apply --auto-approve -no-color"
                 }
             }
         }
         
-        stage('Add Public IP to Ansible config'){
+        stage('Add Public IP to Ansible config and change localhost to remote public IP'){
             steps{
                 script {
                     sh '''
                     cd ./Terraform
                     Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'`
-                    echo $Public_IP
                     sed -i -e "s/Public_IP/$Public_IP/g" ../Ansible/inventory.yml
+                    sed -i -e "s/localhost/$Public_IP/g" ../docs/*
+                    sed -i -e "s/localhost/$Public_IP/g" ../cmd/main.go
                     '''
+                }
+            }
+        }
+        
+        stage('Change image name and DB password in docker-compose.yml'){
+            steps{
+                script {
+                    sh '''
+                    sed -i -e "s#image: eugenia1p/todo_go_rest#image: $imageName#g" ./docker-compose.yml
+                    sed -i -e "s/DB_PASSWORD=qwerty/DB_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
+                    sed -i -e "s/POSTGRES_PASSWORD=qwerty/POSTGRES_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
+                    '''
+                }
+            }
+        }
+        
+        stage('Create .env'){
+            steps {
+                sh 'echo "DB_PASSWORD=$DB_PASSWORD" >> .env'
+            }
+        }
+        
+        stage('Deploy our image') {
+            steps{
+                script {
+                    dockerImage = docker.build imageName
+                }
+            }
+        }
+        
+        stage('Push our image') {
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'dockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"'
+                    sh 'docker push $imageName:latest; docker push $imageName:$BUILD_NUMBER'
                 }
             }
         }
