@@ -25,11 +25,14 @@
 - Terraform
 - CloudBees AWS Credentials Plugin
 
-> Configure terraform you can here **_Manage Jenkins >> Global Configuration_**
-> 
-> 
-> And configure docker you can using the same path
+> Configure **Terraform** you can here **_Manage Jenkins >> Global Configuration_**
 >
+> ![image](https://user-images.githubusercontent.com/71873090/182134652-b400410f-21a6-488c-bbc0-6d2dc405212d.png)
+> 
+> And configure **Docker** you can using the same path
+>
+>![image](https://user-images.githubusercontent.com/71873090/182134709-8cd1264d-d729-4d8f-a65f-e14abe9aba6f.png)
+
 
 2. Add credentials
     - AWS_TODO - as an **_AWS Credentials_** using the IAM User credentials that were created before
@@ -44,4 +47,5 @@
 >
 > Create the GitHub **Personal Access Token** with **_Full control of private repositories_**
 
-3. And finally, create **pipeline** job and add Jenkinsfile as a **_Pipeline script form SCM_**
+3. And finally, create **pipeline** job and add Jenkinsfile as a **_Pipeline script form SCM_**. using your **github** credentials saved as a Jenkins credentials
+![telegram-cloud-photo-size-2-5420578027445795973-y](https://user-images.githubusercontent.com/71873090/182135003-7ca4a601-760b-4436-a156-204e4f67f8ff.jpg)
