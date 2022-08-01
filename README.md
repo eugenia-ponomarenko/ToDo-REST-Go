@@ -2,6 +2,8 @@
 - [on localhost](#deploying-on-localhost)
 - [on remote](#deploying-on-remote)
 
+- [python script to save your authentication bearer token in AWS SSM Parameter Store](#python-script-to-save-your-authentication-bearer-token-in-aws-ssm-parameter-store)
+
 ## Deploying on localhost
 ### Install tools that gives below:
 - Docker, docker-compose
