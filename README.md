@@ -1,8 +1,9 @@
 # Deploying ToDo-REST-Go
-- [on localhost](#deploying-on-localhost)
-- [on remote](#deploying-on-remote)
+- [On localhost](#deploying-on-localhost)
+- [On remote](#deploying-on-remote)
 
-- [python script to save your authentication bearer token in AWS SSM Parameter Store](#python-script-to-save-your-authentication-bearer-token-in-aws-ssm-parameter-store)
+- [Python script to save your authentication bearer token in AWS SSM Parameter Store](#python-script-to-save-your-authentication-bearer-token-in-aws-ssm-parameter-store)
+- [Error when running Jenkins pipeline](#error-in-jenkins-pipeline)
 
 ## Deploying on localhost
 ### Install tools that gives below:
@@ -86,3 +87,30 @@ aws_secret_access_key = /vJ/0EjMJ**************
 4. Change an **url** to your Public IP if you [deploy on remote](#deploying-on-remote) or leave the same one
     
 5. Execute the **aws-ssm.py** script
+
+### Error in Jenkins pipeline
+
+If you have similar error with terraform, ansible, docker, etc., you can try this solving.
+
+```
+java.io.IOException: error=2, No such file or directory
+	at java.base/java.lang.ProcessImpl.forkAndExec(Native Method)
+	at java.base/java.lang.ProcessImpl.<init>(ProcessImpl.java:340)
+	at java.base/java.lang.ProcessImpl.start(ProcessImpl.java:271)
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1107)
+Caused: java.io.IOException: Cannot run program "docker": error=2, No such file or directory
+```
+
+**Solving**
+
+Edit **_/usr/local/opt/jenkins-lts/homebrew.mxcl.jenkins-lts.plist_** file as following:
+
+```
+<key>EnvironmentVariables</key>     
+	<dict>       
+		<key>PATH</key>       
+		<string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>     
+	</dict>
+```
+
+<img width="582" alt="image" src="https://user-images.githubusercontent.com/71873090/182325011-cdaf2987-1c99-4b4f-b497-11a85944e9f9.png">
