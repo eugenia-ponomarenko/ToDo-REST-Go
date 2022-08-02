@@ -15,17 +15,6 @@ pipeline {
     }
     
     stages {
-        
-        stage('Set Terraform path') {
-            steps {
-                script {
-                    def tfHome = tool name: 'terraform'
-                    env.PATH = "${tfHome}:${env.PATH}"
-                }
-                sh 'terraform --version'
-            }
-        }
-
         stage('Git clone'){
             steps{
                 git url: 'https://github.com/eugenia-ponomarenko/ToDo-REST-Go.git', credentialsId: 'github', branch: 'main'
@@ -110,13 +99,14 @@ pipeline {
         
         stage('Remove Unused docker image') {       
             steps{         
-                sh "docker rmi $registry:$BUILD_NUMBER"       
+                sh "docker rmi $registry:$BUILD_NUMBER"   
+                sh "docker rmi $registry:latest" 
             }     
         }
         
         stage('Ansible-playbook'){
             steps{
-                sh 'cd ./Ansible; /usr/local/bin/ansible-playbook $JENKINS_HOME/workspace/$JOB_NAME/Ansible/playbook.yaml --inventory-file $JENKINS_HOME/workspace/$JOB_NAME/Ansible/inventory.yml '
+                sh 'cd ./Ansible; ansible-playbook playbook.yaml --inventory-file inventory.yml '
             }
         }
         
