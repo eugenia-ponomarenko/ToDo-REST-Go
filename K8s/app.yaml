@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: app-deployment
+  namespace: todo-app-ns
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template: 
+    metadata:
+      labels: 
+        app: app
+    spec:
+      containers:
+      - name: app
+        image: eugenia1p/todo_go_rest:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: db-password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  namespace: todo-app-ns
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: NodePort
+
+# brew install golang-migrate  
+# kubectl create namespace app-ns
+# kubectl apply -f secret.yaml    
+# kubectl apply -f pv.yaml    
+# kubectl apply -f pv-claim.yaml    
+# kubectl apply -f db.yaml    
+# minikube service db --url -n todo-app-ns
+# migrate -path ./schema -database 'postgres://postgres:qwerty@(IP ADDRESS AND PORT OF MINIKUBE OUTPUT)/postgres?sslmode=disable' up
+# kubectl apply -f todo.yaml  
+# minikube service app --url -n todo-app-ns

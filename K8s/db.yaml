@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: db-deployment
+  namespace: todo-app-ns
+  labels:
+    app: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template: 
+    metadata:
+      labels: 
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: postgres:alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: db-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+          - mountPath: /data
+            name: postgres-pv
+      volumes:
+      - name: postgres-pv
+        persistentVolumeClaim:
+            claimName: postgres-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: todo-app-ns
+  labels:
+    app: db
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: NodePort
+
+# brew install golang-migrate  
+# kubectl create namespace app-ns
+# kubectl apply -f secret.yaml    
+# kubectl apply -f pv.yaml    
+# kubectl apply -f pv-claim.yaml    
+# kubectl apply -f db.yaml    
+# minikube service db --url -n todo-app-ns
+# migrate -path ./schema -database 'postgres://postgres:qwerty@(IP ADDRESS AND PORT OF MINIKUBE OUTPUT)/postgres?sslmode=disable' up
+# kubectl apply -f todo.yaml  
+# minikube service app --url -n todo-app-ns
