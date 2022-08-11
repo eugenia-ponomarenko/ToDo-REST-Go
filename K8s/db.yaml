@@ -51,15 +51,3 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
-  type: NodePort
-
-# brew install golang-migrate  
-# kubectl create namespace app-ns
-# kubectl apply -f secret.yaml    
-# kubectl apply -f pv.yaml    
-# kubectl apply -f pv-claim.yaml    
-# kubectl apply -f db.yaml    
-# minikube service db --url -n todo-app-ns
-# migrate -path ./schema -database 'postgres://postgres:qwerty@(IP ADDRESS AND PORT OF MINIKUBE OUTPUT)/postgres?sslmode=disable' up
-# kubectl apply -f todo.yaml  
-# minikube service app --url -n todo-app-ns

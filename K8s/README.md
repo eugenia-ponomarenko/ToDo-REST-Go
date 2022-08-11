@@ -30,44 +30,23 @@ kubectl apply -f pv-claim.yaml
 kubectl apply -f db.yaml    
 ```
 
-Then get URL for the DB service which needed for migration, copy it without **http://** and enter instead of **MINIKUBE_URL_FOR_DB_SERVICE** on the next line: 
+Then forward port for **db** service to have access from the Internet and migrate DB (but for mgration open a new terminal so as not to close the connection)
 
 ```
-minikube service db --url -n todo-app-ns
-migrate -path ../schema -database "postgres://postgres:qwerty@MINIKUBE_URL_FOR_DB_SERVICE/postgres?sslmode=disable" up 
+kubectl --namespace todo-app-ns port-forward svc/db 5432
+migrate -path ../schema -database "postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable" up 
 ```
 
----
-
-### Docker build and push
-
-First, you need change IP in swagger docs to **MINIKUBE_URL_FOR_DB_SERVICE** without **http://** as following:
-
-```
-sed -i -E "s/localhost:8000/MINIKUBE_URL_FOR_DB_SERVICE/g" ./cmd/main.go
-sed -i -E "s/localhost:8000/MINIKUBE_URL_FOR_DB_SERVICE/g" ./docs/*
-```
-
-Login to your DockerHub account and build, push new docker image.
-
-```
-docker login -u YOUR_USERNAME -p YOUR_PASSWORD
-docker build -t YOUR_USERNAME/todo_go_rest:kubernetes .
-docker push YOUR_USERNAME/todo_go_rest:kubernetes 
-```
-
----
-
-Then in **app.yaml** file, change name of the image to **YOUR_USERNAME/todo_go_rest:kubernetes** on the *20th line* and create resources for the app:
+Then create resources for the app:
 
 ```
 kubectl apply -f app.yaml  
 ```
 
-Finally, to get access to the app you need to get URL of Kubernetes service "app":
+Finally, forward port for **app** service to get access to the app:
 
 ```
-minikube service app --url -n todo-app-ns
+kubectl --namespace todo-app-ns port-forward svc/app 8000
 ```
 
-Then you can open web-app in browser with MINIKUBE_URL_FOR_APP_SERVICE/swagger/index.html
+Then you can open web-app in browser with [localhost:8000/swagger/index.html](http://localhost:8000/swagger/index.html)
