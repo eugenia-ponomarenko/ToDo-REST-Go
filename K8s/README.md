@@ -1,4 +1,4 @@
-# Deploy app on Kubernetes (locally)
+# Deploying an application using Kubernetes (on-premise)
 
 ## Install required tools:
 - golang-migrate  
@@ -6,6 +6,7 @@
 - kubectl
 - minikube
 
+---
 
 Clone this repository and switch to the *K8s* directory, from which you will continue to work:
 
@@ -36,7 +37,9 @@ minikube service db --url -n todo-app-ns
 migrate -path ../schema -database "postgres://postgres:qwerty@MINIKUBE_URL_FOR_DB_SERVICE/postgres?sslmode=disable" up 
 ```
 
-## Docker build and push
+---
+
+### Docker build and push
 
 First, you need change IP in swagger docs to **MINIKUBE_URL_FOR_DB_SERVICE** without **http://** as following:
 
@@ -52,6 +55,8 @@ docker login -u YOUR_USERNAME -p YOUR_PASSWORD
 docker build -t YOUR_USERNAME/todo_go_rest:kubernetes .
 docker push YOUR_USERNAME/todo_go_rest:kubernetes 
 ```
+
+---
 
 Then in **app.yaml** file, change name of the image to **YOUR_USERNAME/todo_go_rest:kubernetes** on the *20th line* and create resources for the app:
 
