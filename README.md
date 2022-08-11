@@ -1,6 +1,7 @@
 # Deploying ToDo-REST-Go
-- [On localhost](#deploying-on-localhost)
+- [On premise](#deploying-on-localhost)
 - [On remote](#deploying-on-remote)
+- [On premise with K8s](K8s/README.md)
 
 - [Python script to save your authentication bearer token in AWS SSM Parameter Store](#python-script-to-save-your-authentication-bearer-token-in-aws-ssm-parameter-store)
 - [Error when running Jenkins pipeline](#error-in-jenkins-pipeline)
