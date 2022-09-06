@@ -11,6 +11,12 @@
 - Docker, docker-compose
 - golang-migrate
 
+And run following command:
+```
+make migrate && make run
+```
+
+
 ## Deploying on remote
 ### Install tools that gives below:
 - Jenkins
