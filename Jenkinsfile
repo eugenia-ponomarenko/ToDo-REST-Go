@@ -2,13 +2,12 @@ pipeline {
     agent any
     tools {
         dockerTool 'docker'
-    
     }
     
     environment {
         registry = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
-        DB_PASSWORD = credentials('db_password')
+        DB_PASSWORD = credentials('db_password') // in the app password 'qwerty' was hard coded
         TODO_KEY  = credentials('todo_key')
         Public_IP = ''
         dockerImage = ''
@@ -78,17 +77,10 @@ pipeline {
             }
         }
         
-        stage('Build docker image') {
+        stage('Deploy image on GitHub') {
             steps{
                 script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER"    
-                }
-            }
-        }
-        
-        stage('Push docker image') {
-            steps{
-                script {
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
                     docker.withRegistry( '', registryCredential ) {             
                         dockerImage.push()
                         dockerImage.push('latest')
