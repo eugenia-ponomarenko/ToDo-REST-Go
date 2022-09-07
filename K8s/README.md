@@ -30,7 +30,7 @@ kubectl apply -f pv-claim.yaml
 kubectl apply -f db.yaml    
 ```
 
-Then forward port for **db** service to have access from the Internet and migrate DB (but for mgration open a new terminal so as not to close the connection)
+Wait a little for **running** status of all resources and then forward port for **db** service to have access from the Internet and migrate DB (but for migration open a new terminal so as not to close the connection)
 
 ```
 kubectl --namespace todo-app-ns port-forward svc/db 5432
@@ -43,7 +43,7 @@ Then create resources for the app:
 kubectl apply -f app.yaml  
 ```
 
-Finally, forward port for **app** service to get access to the app:
+Also, wait a little for **running** status of **svc/app** resource and forward port for it to get access to the app:
 
 ```
 kubectl --namespace todo-app-ns port-forward svc/app 8000
