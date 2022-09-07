@@ -128,14 +128,16 @@ Edit **_/usr/local/opt/jenkins-lts/homebrew.mxcl.jenkins-lts.plist_** file as fo
 }
 ```
 2. Create an IAM User for boto3 with this policy and **Access key - Programmatic access** access type.
-3. Add credentials to **~/.aws/credentials** file as following:
+3. Add credentials for **aws** as following:
 
 ```
-[default]
-aws_access_key_id = AKIA************
-aws_secret_access_key = /vJ/0EjMJ**************
+> aws configure --profile ssm
+AWS Access Key ID [None]: AKIASA************
+AWS Secret Access Key [None]: jS+ZbKn***********************
 ```
 
 4. Change an **url** value to your Public IP if you [deploy on remote](#deploying-on-remote) or leave the same one.
     
 5. Execute the [aws-ssm.py](aws-ssm.py) script.
+
+> This script uses **sign-in** to get the token, so if you want to get a token from a specific account, don't forget to create it in the API first. You can do this from a link **url:8000/swagger/index.html** using the **sign-up** command in **auth** section.

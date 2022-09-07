@@ -2,7 +2,8 @@ import boto3, subprocess, json
 
 AWS_REGION = "eu-central-1"
 
-ssm_client = boto3.client("ssm", region_name=AWS_REGION)
+session = boto3.Session(profile_name='ssm')
+ssm_client = session.client("ssm", region_name=AWS_REGION)
 
 url = 'localhost'
 parameter_name = 'Auth-ToDo'
@@ -34,20 +35,25 @@ auth_token = subprocess.check_output([
     f'http://{url}:8000/auth/sign-in'
 ]).decode("utf-8").replace('{"token":"', '').replace('"}', '') 
 
+# decode to utf-8 because of TypeError: a bytes-like object is required, not 'str'
 
-try:
-    ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
-    choice = input('This parameter exists in your parameter store, do you want to create new version of it? y/n: ')
-    if choice == 'y':
-        put_parameter(parameter_name)
-except ssm_client.exceptions.ParameterNotFound:
-    put_parameter(parameter_name)
-    print('\nParameter was created!!!\n')
-
-
-get_param_request = input("Do you want to get your token from SSM Parameter Store? y/n: ")
-if get_param_request == 'y':
-    get_parameter(parameter_name)
-else:
-    print("Bye")
+if auth_token == '{"message":"sql: no rows in result set':
+    print('\nCREDENTIALS IS INCORRECT')
     quit
+else:
+    try:
+        ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
+        choice = input('This parameter exists in your parameter store, do you want to create new version of it? y/n: ')
+        if choice == 'y':
+            put_parameter(parameter_name)
+    except ssm_client.exceptions.ParameterNotFound:
+        put_parameter(parameter_name)
+        print('\nParameter was created!!!\n')
+
+
+    get_param_request = input("Do you want to get your token from SSM Parameter Store? y/n: ")
+    if get_param_request == 'y':
+        get_parameter(parameter_name)
+    else:
+        print("Bye")
+        quit
