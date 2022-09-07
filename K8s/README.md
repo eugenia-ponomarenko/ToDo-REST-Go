@@ -1,4 +1,4 @@
-# Deploying an application using Kubernetes (on-premise)
+# Deploying an application using Kubernetes (on premise)
 
 ## Install required tools:
 - golang-migrate  
