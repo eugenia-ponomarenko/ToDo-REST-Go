@@ -38,9 +38,10 @@ pipeline {
 
         stage('Terraform apply'){
             steps{
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_TODO',
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS-EC2',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
-                    sh "cd ./Terraform; terraform apply --auto-approve -no-color"
+                    sh "cd ./Terraform; terraform init"
+                    sh "cd ./Terraform; terraform apply --auto-approve"
                 }
             }
         }
