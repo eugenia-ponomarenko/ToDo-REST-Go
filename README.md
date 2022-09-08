@@ -16,7 +16,12 @@
 
 And execute the following command:
 ```
-make migrate && make run
+make run
+```
+
+In new terminal execute command below:
+```
+make migrate
 ```
 
 # Deploying on remote
