@@ -1,4 +1,5 @@
 import boto3, subprocess, json
+from getpass import getpass
 
 AWS_REGION = "eu-central-1"
 
@@ -24,7 +25,7 @@ def get_parameter(parameter_name):
 
 print('Sign in to get a token to your account/n')
 username = input("Enter your username: ")
-password = input("Enter your password: ")
+password = getpass("Enter your password: ")
 
 auth_token = subprocess.check_output([
     'curl',
