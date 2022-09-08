@@ -7,7 +7,7 @@ pipeline {
     environment {
         registry = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
-        DB_PASSWORD = credentials('db_password') // in the app password 'qwerty' was hard coded
+        DB_PASSWORD = credentials('db_password')
         TODO_KEY  = credentials('todo_key')
         Public_IP = ''
         dockerImage = ''
