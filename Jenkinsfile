@@ -7,7 +7,7 @@ pipeline {
     environment {
         registry = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
-        DB_PASSWORD = credentials('db_password') // in the app password 'qwerty' was hard coded
+        DB_PASSWORD = credentials('db_password')
         TODO_KEY  = credentials('todo_key')
         Public_IP = ''
         dockerImage = ''
@@ -20,7 +20,7 @@ pipeline {
             }
         }
         
-        stage('Copy email credentials and ansible_ssh_key.pem') {
+        stage('Copy ansible_ssh_key.pem') {
             steps {
                 script {
                     def exists = fileExists './.ssh'
@@ -78,7 +78,7 @@ pipeline {
             }
         }
         
-        stage('Deploy image on GitHub') {
+        stage('Deploy image on DockerHub') {
             steps{
                 script {
                     dockerImage = docker.build registry + ":$BUILD_NUMBER" 
