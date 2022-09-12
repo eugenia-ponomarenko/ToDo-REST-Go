@@ -34,7 +34,29 @@ make migrate
 - Docker
 
 ## AWS configuration
-- Create an IAM User with **Access key - Programmatic access** access type and **AmazonEC2FullAccess** policy
+- Create an IAM policy with the following AWS IAM Statement with your bucket name:
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::mybucket"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::mybucket/*"
+    }
+  ]
+}
+
+```
+
+> And also in **Terraform/main.tf** file you need to change the name of the bucket.
+
+- Create an IAM User with **Access key - Programmatic access** access type and **AmazonEC2FullAccess** policy and created policy above.
 - Create EC2 key pair with **todo_key.pem** with **RSA** key pair type
 
 ## Jenkins configuration
