@@ -8,40 +8,20 @@ pipeline {
         registry = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
         DB_PASSWORD = credentials('db_password')
-        TODO_KEY  = credentials('todo_key')
         Public_IP = ''
         dockerImage = ''
     }
     
     stages {
-        stage('Git clone'){
-            steps{
-                git url: 'https://github.com/eugenia-ponomarenko/ToDo-REST-Go.git', credentialsId: 'github', branch: 'main'
-            }
-        }
-        
-        stage('Copy ansible_ssh_key.pem') {
-            steps {
-                script {
-                    def exists = fileExists './.ssh'
-                    if (exists) {
-                        sh "cp \$TODO_KEY ./.ssh/"
-                        sh "chmod 600 ./.ssh/todo_key.pem"
-                    } else {
-                        sh "mkdir ./.ssh"
-                        sh "cp \$TODO_KEY ./.ssh/"
-                        sh "chmod 600 ./.ssh/todo_key.pem"
-                    }
-                }
-            }
-        }
-
         stage('Terraform apply'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
-                    sh "cd ./Terraform; terraform init"
-                    sh "cd ./Terraform; terraform apply --auto-approve"
+                    sh '''
+                    cd ./Terraform 
+                    terraform init
+                    terraform apply --auto-approve
+                    '''
                 }
             }
         }
@@ -99,7 +79,7 @@ pipeline {
         
         stage('Ansible-playbook'){
             steps{
-                sh 'cd ./Ansible; ansible-playbook playbook.yaml --inventory-file inventory.yml '
+                ansiblePlaybook(credentialsId: 'todo_key_ssh', disableHostKeyChecking: true, installation: 'Ansible', inventory: 'Ansible/inventory.yml', playbook: 'Ansible/playbook.yaml')
             }
         }
         

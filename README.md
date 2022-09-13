@@ -71,7 +71,7 @@ make migrate
 
 2. Add credentials in **_Manage Jenkins >> Security >> Manage Credentials_**
     - AWS-EC2 - as an **_AWS Credentials_** using the IAM User credentials that were created before
-    - todo_key - as a **_Secret file_** with key pair file **todo_key.pem**
+    - todo_key_ssh - as a **_SSH Username with private key_** with **ubuntu** as a username and content of key pair file **todo_key.pem** as private key
     - db_password - as a **_Secret file_** with password for DB
     - github - as an **_Username with password_** (as a password use the **Personal Access Token**)
     - dockerHub - as a **_Username with password_** (as a password use the **Access Token**)
