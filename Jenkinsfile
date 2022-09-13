@@ -79,7 +79,7 @@ pipeline {
         
         stage('Ansible-playbook'){
             steps{
-                ansiblePlaybook(credentialsId: 'todo_key_text', disableHostKeyChecking: true, installation: 'Ansible', inventory: 'Ansible/inventory.yml', playbook: 'Ansible/playbook.yaml')
+                ansiblePlaybook(credentialsId: 'todo_key_ssh', disableHostKeyChecking: true, installation: 'Ansible', inventory: 'Ansible/inventory.yml', playbook: 'Ansible/playbook.yaml')
             }
         }
         
