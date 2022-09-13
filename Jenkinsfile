@@ -80,7 +80,7 @@ pipeline {
         stage('Ansible-playbook'){
             steps{
                 // sh 'cd ./Ansible; ansible-playbook playbook.yaml --inventory-file inventory.yml '
-                ansiblePlaybook(credentialsId: 'todo_key', inventory: 'Ansible/inventory.yml', playbook: 'Ansible/playbook.yaml')
+                ansiblePlaybook(credentialsId: 'todo_key', disableHostKeyChecking: true, installation: 'Ansible', inventory: 'Ansible/inventory.yml', playbook: 'Ansible/playbook.yaml')
             }
         }
         
