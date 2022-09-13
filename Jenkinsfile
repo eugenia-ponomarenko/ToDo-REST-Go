@@ -13,12 +13,6 @@ pipeline {
     }
     
     stages {
-        stage('Git clone'){
-            steps{
-                git url: 'https://github.com/eugenia-ponomarenko/ToDo-REST-Go.git', credentialsId: 'github', branch: 'main'
-            }
-        }
-
         stage('Terraform apply'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
