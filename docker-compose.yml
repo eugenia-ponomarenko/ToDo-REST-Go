@@ -2,14 +2,12 @@ version: '3.3'
 
 services:
   todo-app:
+    restart: always
     image: eugenia1p/todo_go_rest:latest
-    command: ./wait_for_postgres.sh db ./todo-app
     ports:
       - 8000:8000
     depends_on:
       - db
-    environment:
-      - DB_PASSWORD=qwerty
 
   db:
     restart: always
