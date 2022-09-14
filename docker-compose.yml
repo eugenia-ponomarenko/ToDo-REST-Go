@@ -3,7 +3,7 @@ version: '3.3'
 services:
   todo-app:
     restart: always
-    image: eugenia1p/todo_go_rest:latest
+    image: eugenia1p/todo_rest:latest
     ports:
       - 8000:8000
     depends_on:

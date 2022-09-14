@@ -57,7 +57,13 @@ pipeline {
                 sh 'echo "DB_PASSWORD=$DB_PASSWORD" >> .env'
             }
         }
-        
+
+        stage('Build executable for app'){
+            steps {
+                sh 'env GOOS=linux GOARCH=amd64 go build -o todo-app ./cmd/main.go '
+            }
+        }
+
         stage('Deploy image on DockerHub') {
             steps{
                 script {
