@@ -6,7 +6,7 @@ AWS_REGION = "eu-central-1"
 session = boto3.Session(profile_name='ssm')
 ssm_client = session.client("ssm", region_name=AWS_REGION)
 
-ip = '18.194.163.250'
+ip = 'localhost'
 sign_in_url = f'http://{ip}:8000/auth/sign-in'
 
 regex = '[A-Za-z0-9]*\.[A-Za-z0-9]*\.[A-Za-z0-9_]*'
