@@ -1,5 +1,4 @@
-import requests
-import boto3, subprocess, json
+import boto3, requests, json
 from getpass import getpass
 
 AWS_REGION = "eu-central-1"
@@ -30,22 +29,9 @@ print('Sign in to get a token to your account/n')
 username = input("Enter your username: ")
 password = getpass("Enter your password: ")
 
-auth_token = subprocess.check_output([
-    'curl',
-    '-X', 'POST',
-    '-H', 'accept: application/json',
-    '-H', 'Content-Type: application/json',
-    '-d', json.dumps({"password": password, "username": username}),
-    f'http://{ip}:8000/auth/sign-in'
-]).decode("utf-8").replace('{"token":"', '').replace('"}', '') 
-
 headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
 data = json.dumps({"password": password, "username": username})
-r = requests.post(sign_in_url, data=data, headers=headers)
-
-print(r)
-
-# decode to utf-8 because of TypeError: a bytes-like object is required, not 'str'
+auth_token = requests.post(sign_in_url, data=data, headers=headers).json().get('token') 
 
 if auth_token == '{"message":"sql: no rows in result set':
     print('\nCREDENTIALS IS INCORRECT')
