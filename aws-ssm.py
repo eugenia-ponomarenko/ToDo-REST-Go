@@ -1,3 +1,4 @@
+import requests
 import boto3, subprocess, json
 from getpass import getpass
 
@@ -6,7 +7,9 @@ AWS_REGION = "eu-central-1"
 session = boto3.Session(profile_name='ssm')
 ssm_client = session.client("ssm", region_name=AWS_REGION)
 
-url = 'localhost'
+ip = 'localhost'
+sign_in_url = f'http://{ip}:8000/auth/sign-in'
+
 parameter_name = 'Auth-ToDo'
 
 def put_parameter(parameter_name):
@@ -33,8 +36,14 @@ auth_token = subprocess.check_output([
     '-H', 'accept: application/json',
     '-H', 'Content-Type: application/json',
     '-d', json.dumps({"password": password, "username": username}),
-    f'http://{url}:8000/auth/sign-in'
+    f'http://{ip}:8000/auth/sign-in'
 ]).decode("utf-8").replace('{"token":"', '').replace('"}', '') 
+
+headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
+data = json.dumps({"password": password, "username": username})
+r = requests.post(sign_in_url, data=data, headers=headers)
+
+print(r)
 
 # decode to utf-8 because of TypeError: a bytes-like object is required, not 'str'
 
