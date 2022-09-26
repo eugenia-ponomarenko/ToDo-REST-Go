@@ -52,7 +52,7 @@ resource "aws_instance" "u_web_server" {
   key_name               = "todo_key"
   iam_instance_profile   = aws_iam_instance_profile.ToDo_instance_profile.name
   vpc_security_group_ids = [aws_security_group.EC2_SecurityGroup.id]
-  subnet_id              = [aws_subnet.public_subnet.id, aws_subnet.private_subnet.id]
+  subnet_id              = aws_subnet.public_subnet.id
 
   tags = {
     Name = "ToDo_App"
@@ -74,7 +74,7 @@ resource "aws_db_instance" "ToDo_RDS_instance" {
   parameter_group_name   = "default.postgres14.4"
   skip_final_snapshot    = true
   publicly_accessible    = true
-  db_subnet_group_name   = [aws_db_subnet_group.ToDo_DB_subnet_group.id]
+  db_subnet_group_name   = aws_db_subnet_group.ToDo_DB_subnet_group.id
   vpc_security_group_ids = [aws_security_group.RDS_SecurityGroup.id]
 
   tags = {
