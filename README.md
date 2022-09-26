@@ -56,7 +56,7 @@ make migrate
 
 > And also in **Terraform/main.tf** file you need to change the name of the bucket.
 
-- Create an IAM User with **Access key - Programmatic access** access type and **AmazonEC2FullAccess** policy and created policy above.
+- Create an IAM User with **Access key - Programmatic access** access type and **AmazonEC2FullAccess**, **AmazonRDSFullAccess** policy and created policy above.
 - Create EC2 key pair with **todo_key.pem** with **RSA** key pair type
 
 ## Jenkins configuration
@@ -70,8 +70,8 @@ make migrate
 
 
 2. Add credentials in **_Manage Jenkins >> Security >> Manage Credentials_**
-    - AWS-EC2 - as an **_AWS Credentials_** using the IAM User credentials that were created before
-    - todo_key_ssh - as a **_SSH Username with private key_** with **ubuntu** as a username and content of key pair file **todo_key.pem** as private key
+    - AWS_EC2_S3 - as an **_AWS Credentials_** using the IAM User credentials that were created before
+    - todo_app_ssh_eu_north_1 - as a **_SSH Username with private key_** with **ubuntu** as a username and content of key pair file **todo_key.pem** as private key
     - db_password - as a **_Secret file_** with password for DB
     - github - as an **_Username with password_** (as a password use the **Personal Access Token**)
     - dockerHub - as a **_Username with password_** (as a password use the **Access Token**)

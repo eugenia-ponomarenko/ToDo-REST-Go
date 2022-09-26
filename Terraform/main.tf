@@ -13,106 +13,75 @@ terraform {
 }
 
 provider "aws" {
-  region  = "eu-central-1"
+  region  = "eu-north-1"
 }
 
-resource "aws_vpc" "main" {
-  cidr_block = "172.20.0.0/16"
-  enable_dns_hostnames = true
-
-  tags = {
-    Name = "ToDO-App"
-  }
-}
-
-resource "aws_internet_gateway" "internet_gateway" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name = "internet-gateway"
-  }
-}
-
-resource "aws_subnet" "public_subnet" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "172.20.20.0/24"
-  availability_zone = "eu-central-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "public-subnet"
-  }
-}
-
-resource "aws_route_table" "IG_route_table" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.internet_gateway.id
-  }
-
-  tags = {
-    Name = "IG-route-table"
-  }
-}
-
-resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
-  depends_on = [
-    aws_subnet.public_subnet,
-    aws_route_table.IG_route_table,
+resource "aws_iam_role" "ToDo_accessToRDS" {
+  name = "ToDo-Access-RDS"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
   ]
-  subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = aws_route_table.IG_route_table.id
+}
+EOF
 }
 
-resource "aws_security_group" "ubuntuSecurityGroup" {
-  name        = "ToDo App SecurityGroup"
-  description = "ToDo_APP. SecurityGroup for Ubuntu"
-  vpc_id      = aws_vpc.main.id
+resource "aws_iam_policy_attachment" "attach_policy" {
+  name       = "Access-EC2-to-RDS"
+  roles      = ["${aws_iam_role.ToDo_accessToRDS.name}"]
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+}
 
-  ingress {
-    from_port   = 8000 # app port
-    to_port     = 8000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22 # port for Ansible connection
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 5432 # port for PostgreSQL
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_iam_instance_profile" "ToDo_instance_profile" {
+  name = "ToDo_instance_profile"
+  role = aws_iam_role.ToDo_accessToRDS.name
 }
 
 resource "aws_instance" "u_web_server" {
-  ami                    = "ami-042ad9eec03638628"  # Ubuntu Server 18.04 LTS (HVM)
-  instance_type          = "t2.micro"
+  ami                    = "ami-0368e9f34d2618ed7"  # Ubuntu Server 18.04 LTS (HVM)
+  instance_type          = "t3.micro"
   key_name               = "todo_key"
-  vpc_security_group_ids = [aws_security_group.ubuntuSecurityGroup.id]
-  subnet_id              = aws_subnet.public_subnet.id
+  iam_instance_profile   = aws_iam_instance_profile.ToDo_instance_profile.name
+  vpc_security_group_ids = [aws_security_group.EC2_SecurityGroup.id]
+  subnet_id              = [aws_subnet.public_subnet.id, aws_subnet.private_subnet.id]
 
   tags = {
-    Name = "ToDo App. Docker"
+    Name = "ToDo_App"
   }
 }
 
-
-output "ip" {
+output "ec2_ip" {
   value = aws_instance.u_web_server.public_ip
+}
+
+resource "aws_db_instance" "ToDo_RDS_instance" {
+  allocated_storage      = 10
+  engine                 = "postgres"
+  engine_version         = "14.4"
+  instance_class         = "db.t3.micro"
+  db_name                = "postgres"
+  username               = "postgres"
+  password               = "postgres"
+  parameter_group_name   = "default.postgres14.4"
+  skip_final_snapshot    = true
+  publicly_accessible    = true
+  db_subnet_group_name   = [aws_db_subnet_group.ToDo_DB_subnet_group.id]
+  vpc_security_group_ids = [aws_security_group.RDS_SecurityGroup.id]
+
+  tags = {
+    Name = "ToDo_RDS_instance"
+  }
+}
+
+output "db_endpoint" {
+  value = aws_db_instance.ToDo_RDS_instance.endpoint
 }

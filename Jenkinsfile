@@ -8,8 +8,6 @@ pipeline {
         registry = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
         DB_PASSWORD = credentials('db_password')
-        Public_IP = ''
-        dockerImage = ''
     }
     
     stages {
@@ -29,24 +27,49 @@ pipeline {
         stage('Add Public IP to Ansible config and change localhost to remote public IP'){
             steps{
                 script {
-                    sh '''
+                    env.Public_IP = sh(returnStdout: true, script: '''
                     cd ./Terraform
-                    Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'`
-                    sed -i -e "s/Public_IP/$Public_IP/g" ../Ansible/inventory.yml
-                    sed -i -e "s/localhost/$Public_IP/g" ../docs/*
-                    sed -i -e "s/localhost/$Public_IP/g" ../cmd/main.go
+                    terraform output ec2_ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
+
+                    sh '''
+                    sed -i -e "s/localhost/$Public_IP/g" ./docs/*
+                    sed -i -e "s/localhost/$Public_IP/g" ./cmd/main.go
+                    '''
+                }
+            }
+        }
+
+        stage('Change db host in configs to RDS Endpoint'){
+            steps{
+                script {
+                    env.DB_ENDPOINT = sh(returnStdout: true, script: '''
+                    cd ./Terraform
+                    terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
+
+                    sh '''
+                    sed -i -e "s/host: \"db\"/host: \"$DB_ENDPOINT\"/g" ./configs/config.yml
                     '''
                 }
             }
         }
         
-        stage('Change image name and DB password in docker-compose.yml'){
+        stage('Change image name in the Ansible playbook'){
             steps{
                 script {
                     sh '''
-                    sed -i -e "s#image: eugenia1p/todo_go_rest#image: $registry#g" ./docker-compose.yml
-                    sed -i -e "s/DB_PASSWORD=qwerty/DB_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
-                    sed -i -e "s/POSTGRES_PASSWORD=qwerty/POSTGRES_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
+                    sed -i -e "s#image: eugenia1p/todo_rest#image: $registry#g" ./Ansible/playbook.yml
+                    sed -i -e "s#name: eugenia1p/todo_rest#name: $registry#g" ./Ansible/playbook.yml
+                    '''
+                }
+            }
+        
+        stage('Change DB password in a terraform file'){
+            steps{
+                script {
+                    sh '''
+                    sed -i -e "s/password               = \"postgres\"/password               = \"$DB_PASSWORD\"/g" ./Terraform/main.tf
                     '''
                 }
             }
@@ -67,7 +90,7 @@ pipeline {
         stage('Deploy image on DockerHub') {
             steps{
                 script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                    env.dockerImage = docker.build registry + ":$BUILD_NUMBER" 
                     docker.withRegistry( '', registryCredential ) {             
                         dockerImage.push()
                         dockerImage.push('latest')
@@ -85,7 +108,14 @@ pipeline {
         
         stage('Ansible-playbook'){
             steps{
-                ansiblePlaybook(credentialsId: 'todo_key_ssh', disableHostKeyChecking: true, installation: 'Ansible', inventory: 'Ansible/inventory.yml', playbook: 'Ansible/playbook.yaml')
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
+                 accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
+                    ansiblePlaybook(credentialsId: 'todo_app_ssh_eu_north_1',
+                                    disableHostKeyChecking: true, 
+                                    installation: 'Ansible', 
+                                    inventory: 'Ansible/aws_ec2.yml', 
+                                    playbook: 'Ansible/playbook.yml')
+                }
             }
         }
         
@@ -93,9 +123,7 @@ pipeline {
             steps{
                 script {
                     sh '''
-                    cd ./Terraform
-                    Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'`
-                    migrate -path ../schema -database "postgres://postgres:$DB_PASSWORD@$Public_IP:5432/postgres?sslmode=disable" up
+                    migrate -path ../schema -database "postgres://postgres:$DB_PASSWORD@$DB_ENDPOINT:5432/postgres?sslmode=disable" up
                     '''
                 }
             }
