@@ -18,7 +18,7 @@ pipeline {
                     sh '''
                     cd ./Terraform 
                     terraform init
-                    terraform apply --auto-approve
+                    terraform apply --auto-approve -no-color
                     '''
                 }
             }
