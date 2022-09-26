@@ -76,6 +76,7 @@ resource "aws_db_instance" "ToDo_RDS_instance" {
   publicly_accessible    = true
   db_subnet_group_name   = aws_db_subnet_group.ToDo_DB_subnet_group.id
   vpc_security_group_ids = [aws_security_group.RDS_SecurityGroup.id]
+  multi_az               = false
 
   tags = {
     Name = "ToDo_RDS_instance"
