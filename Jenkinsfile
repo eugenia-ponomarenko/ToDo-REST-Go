@@ -64,6 +64,7 @@ pipeline {
                     '''
                 }
             }
+        }
         
         stage('Change DB password in a terraform file'){
             steps{
