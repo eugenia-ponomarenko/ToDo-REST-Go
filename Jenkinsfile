@@ -125,7 +125,7 @@ pipeline {
             steps{
                 script {
                     sh '''
-                    migrate -path ../schema -database "postgres://postgres:$DB_PASSWORD@$DB_ENDPOINT:5432/postgres?sslmode=disable" up
+                    migrate -path ./schema -database "postgres://postgres:$DB_PASSWORD@$DB_ENDPOINT:5432/postgres?sslmode=disable" up
                     '''
                 }
             }
