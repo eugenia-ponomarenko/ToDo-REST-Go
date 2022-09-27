@@ -79,7 +79,7 @@ resource "aws_security_group" "EC2_SecurityGroup" {
 
 resource "aws_subnet" "rds" {
   count                   = "2"
-  vpc_id                  = "${aws_vpc.main.id}"
+  vpc_id                  = aws_vpc.main.id
   cidr_block              = "172.20.${2 + count.index}.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "${element(data.aws_availability_zones.available.names, count.index)}"
@@ -92,7 +92,7 @@ resource "aws_subnet" "rds" {
 resource "aws_db_subnet_group" "default" {
   name        = "todo-db-subnet-group"
   description = "Terraform example RDS subnet group"
-  subnet_ids  = ["${aws_subnet.rds.*.id}"]
+  subnet_ids  = [aws_subnet.rds.0.id, aws_subnet.rds.1.id]
 
   tags = {
     Name = "ToDo DB subnet group"
