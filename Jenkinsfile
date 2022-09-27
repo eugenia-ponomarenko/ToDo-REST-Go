@@ -45,7 +45,7 @@ pipeline {
                 script {
                     env.DB_ENDPOINT = sh(returnStdout: true, script: '''
                     cd ./Terraform
-                    terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/' | sed 's/:5432//g'
                     ''').trim()
 
                     sh '''
