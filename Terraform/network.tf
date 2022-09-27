@@ -7,8 +7,6 @@ resource "aws_vpc" "main" {
   }
 }
 
-# Network configurations for EC2 instance
-
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.main.id
 
@@ -50,6 +48,27 @@ resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
   route_table_id = aws_route_table.IG_route_table.id
 }
 
+resource "aws_subnet" "rds" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "172.20.21.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = data.aws_availability_zones.available.names[1]
+
+  tags = {
+    Name = "ToDo-DB-subnet"
+  }
+}
+
+resource "aws_db_subnet_group" "default" {
+  name        = "todo-db-subnet-group"
+  description = "Terraform example RDS subnet group"
+  subnet_ids  = [aws_subnet.rds.id, aws_subnet.public_subnet.id]
+
+  tags = {
+    Name = "ToDo-DB-subnet-group"
+  }
+}
+
 resource "aws_security_group" "EC2_SecurityGroup" {
   name        = "ToDo App SecurityGroup"
   description = "ToDo_APP. SecurityGroup for Ubuntu"
@@ -77,27 +96,6 @@ resource "aws_security_group" "EC2_SecurityGroup" {
   }
 }
 
-resource "aws_subnet" "rds" {
-  count                   = "2"
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "172.20.${2 + count.index}.0/24"
-  map_public_ip_on_launch = true
-  availability_zone       = "${element(data.aws_availability_zones.available.names, count.index)}"
-
-  tags = {
-    Name = "rds-${element(data.aws_availability_zones.available.names, count.index)}"
-  }
-}
-
-resource "aws_db_subnet_group" "default" {
-  name        = "todo-db-subnet-group"
-  description = "Terraform example RDS subnet group"
-  subnet_ids  = [aws_subnet.rds.0.id, aws_subnet.rds.1.id]
-
-  tags = {
-    Name = "ToDo DB subnet group"
-  }
-}
 
 resource "aws_security_group" "RDS_SecurityGroup" {
   name        = "ToDo-DB-Security-Group"
