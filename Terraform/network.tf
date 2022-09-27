@@ -84,7 +84,7 @@ resource "aws_subnet" "rds" {
   map_public_ip_on_launch = true
   availability_zone       = "${element(data.aws_availability_zones.available.names, count.index)}"
 
-  tags {
+  tags = {
     Name = "rds-${element(data.aws_availability_zones.available.names, count.index)}"
   }
 }
