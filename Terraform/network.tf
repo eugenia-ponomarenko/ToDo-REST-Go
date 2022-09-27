@@ -90,7 +90,7 @@ resource "aws_subnet" "rds" {
 }
 
 resource "aws_db_subnet_group" "default" {
-  name        = "ToDo-DB-subnet-group"
+  name        = "todo-db-subnet-group"
   description = "Terraform example RDS subnet group"
   subnet_ids  = ["${aws_subnet.rds.*.id}"]
 
