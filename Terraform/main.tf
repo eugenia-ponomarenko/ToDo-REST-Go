@@ -75,7 +75,7 @@ resource "aws_db_instance" "ToDo_RDS_instance" {
   db_name                = "postgres"
   username               = "postgres"
   password               = "postgres"
-  parameter_group_name   = "default.postgres14.4"
+  parameter_group_name   = "default.postgres14"
   publicly_accessible    = true
   db_subnet_group_name   = aws_db_subnet_group.default.id
   vpc_security_group_ids = [aws_security_group.RDS_SecurityGroup.id]
