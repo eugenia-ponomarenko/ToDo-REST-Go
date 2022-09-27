@@ -16,6 +16,11 @@ provider "aws" {
   region  = "eu-north-1"
 }
 
+variable "db_password" {
+  type = string
+  sensitive = true
+}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -74,7 +79,7 @@ resource "aws_db_instance" "ToDo_RDS_instance" {
   instance_class         = "db.t3.micro"
   db_name                = "postgres"
   username               = "postgres"
-  password               = "postgres"
+  password               = var.db_password
   parameter_group_name   = "default.postgres14"
   publicly_accessible    = true
   db_subnet_group_name   = aws_db_subnet_group.default.id

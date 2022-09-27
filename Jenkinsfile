@@ -18,7 +18,7 @@ pipeline {
                     sh '''
                     cd ./Terraform 
                     terraform init
-                    terraform apply --auto-approve -no-color
+                    terraform apply -var db_password="$DB_PASSWORD" --auto-approve -no-color
                     '''
                 }
             }
@@ -62,16 +62,6 @@ pipeline {
                     sh '''
                     sed -i -e "s#image: eugenia1p/todo_rest#image: $registry#g" ./Ansible/playbook.yml
                     sed -i -e "s#name: eugenia1p/todo_rest#name: $registry#g" ./Ansible/playbook.yml
-                    '''
-                }
-            }
-        }
-        
-        stage('Change DB password in a terraform file'){
-            steps{
-                script {
-                    sh '''
-                    sed -i -e "s/password               = \"postgres\"/password               = \"$DB_PASSWORD\"/g" ./Terraform/main.tf
                     '''
                 }
             }
