@@ -50,6 +50,7 @@ pipeline {
 
                     sh '''
                     sed -i -e "s/host: \"db\"/host: \"$DB_ENDPOINT\"/g" ./configs/config.yml
+                    cat ./configs/config.yml
                     '''
                 }
             }

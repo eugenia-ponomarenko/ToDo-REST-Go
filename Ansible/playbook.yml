@@ -57,6 +57,7 @@
       docker_container:
         name: todo-app
         image: eugenia1p/todo_rest:latest
-        restart: always
+        restart: yes
+        restart-policy: always
         ports:
          - "8000:8000"
