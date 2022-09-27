@@ -64,7 +64,7 @@ output "ec2_ip" {
 }
 
 resource "aws_db_instance" "ToDo_RDS_instance" {
-  allocated_storage      = 10
+  allocated_storage      = 5
   engine                 = "postgres"
   engine_version         = "14.4"
   instance_class         = "db.t3.micro"
@@ -72,11 +72,11 @@ resource "aws_db_instance" "ToDo_RDS_instance" {
   username               = "postgres"
   password               = "postgres"
   parameter_group_name   = "default.postgres14.4"
-  skip_final_snapshot    = true
   publicly_accessible    = true
-  db_subnet_group_name   = aws_db_subnet_group.ToDo_DB_subnet_group.id
+  db_subnet_group_name   = aws_db_subnet_group.default.id
   vpc_security_group_ids = [aws_security_group.RDS_SecurityGroup.id]
-  multi_az               = false
+  skip_final_snapshot    = true
+  final_snapshot_identifier = "Ignore"
 
   tags = {
     Name = "ToDo_RDS_instance"
