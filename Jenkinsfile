@@ -91,7 +91,7 @@ pipeline {
         stage('Deploy image on DockerHub') {
             steps{
                 script {
-                    env.dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
                     docker.withRegistry( '', registryCredential ) {             
                         dockerImage.push()
                         dockerImage.push('latest')
