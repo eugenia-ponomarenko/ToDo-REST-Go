@@ -23,7 +23,39 @@ pipeline {
                 }
             }
         }
+
+        stage('Migrate DB schema'){
+            steps{
+                script {
+                    env.DB_ENDPOINT = sh(returnStdout: true, script: '''
+                    cd ./Terraform
+                    terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/' | sed 's/:5432//g'
+                    ''').trim()
+                    
+                    sh '''
+                    migrate -path ./schema -database "postgres://postgres:$DB_PASSWORD@$DB_ENDPOINT:5432/postgres?sslmode=disable" up
+                    '''
+                }
+            }
+        }
         
+        stage('Create .env'){
+            steps {
+                sh 'echo "DB_PASSWORD=$DB_PASSWORD" >> .env'
+            }
+        }
+
+        stage('Change db host in configs to RDS Endpoint'){
+            steps{
+                script {
+                    sh '''
+                    sed -i -e "s/host: 'db'/host: '$DB_ENDPOINT'/g" ./configs/config.yml
+                    cat ./configs/config.yml
+                    '''
+                }
+            }
+        }
+
         stage('Add Public IP to Ansible config and change localhost to remote public IP'){
             steps{
                 script {
@@ -37,39 +69,6 @@ pipeline {
                     sed -i -e "s/localhost/$Public_IP/g" ./cmd/main.go
                     '''
                 }
-            }
-        }
-
-        stage('Change db host in configs to RDS Endpoint'){
-            steps{
-                script {
-                    env.DB_ENDPOINT = sh(returnStdout: true, script: '''
-                    cd ./Terraform
-                    terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/' | sed 's/:5432//g'
-                    ''').trim()
-
-                    sh '''
-                    sed -i -e "s/host: 'db'/host: '$DB_ENDPOINT'/g" ./configs/config.yml
-                    cat ./configs/config.yml
-                    '''
-                }
-            }
-        }
-        
-        stage('Change image name in the Ansible playbook'){
-            steps{
-                script {
-                    sh '''
-                    sed -i -e "s#image: eugenia1p/todo_rest#image: $registry#g" ./Ansible/playbook.yml
-                    sed -i -e "s#name: eugenia1p/todo_rest#name: $registry#g" ./Ansible/playbook.yml
-                    '''
-                }
-            }
-        }
-        
-        stage('Create .env'){
-            steps {
-                sh 'echo "DB_PASSWORD=$DB_PASSWORD" >> .env'
             }
         }
 
@@ -97,6 +96,17 @@ pipeline {
                 sh "docker rmi $registry:latest" 
             }     
         }
+
+        stage('Change image name in the Ansible playbook'){
+            steps{
+                script {
+                    sh '''
+                    sed -i -e "s#image: eugenia1p/todo_rest#image: $registry#g" ./Ansible/playbook.yml
+                    sed -i -e "s#name: eugenia1p/todo_rest#name: $registry#g" ./Ansible/playbook.yml
+                    '''
+                }
+            }
+        }
         
         stage('Ansible-playbook'){
             steps{
@@ -107,16 +117,6 @@ pipeline {
                                     installation: 'Ansible', 
                                     inventory: 'Ansible/aws_ec2.yml', 
                                     playbook: 'Ansible/playbook.yml')
-                }
-            }
-        }
-        
-        stage('Migrate DB'){
-            steps{
-                script {
-                    sh '''
-                    migrate -path ./schema -database "postgres://postgres:$DB_PASSWORD@$DB_ENDPOINT:5432/postgres?sslmode=disable" up
-                    '''
                 }
             }
         }
