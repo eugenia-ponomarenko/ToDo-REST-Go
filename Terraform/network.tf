@@ -20,7 +20,7 @@ resource "aws_internet_gateway" "internet_gateway" {
 resource "aws_subnet" "public_subnet" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "172.20.20.0/24"
-  availability_zone = "eu-north-1a"
+  availability_zone = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
 
   tags = {
@@ -82,9 +82,10 @@ resource "aws_subnet" "rds" {
   vpc_id                  = "${aws_vpc.main.id}"
   cidr_block              = "172.20.${2 + count.index}.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = ["eu-north-1a", "eu-north-1b"]
+  availability_zone       = "${element(data.aws_availability_zones.available.names, count.index)}"
+
   tags {
-    Name = "rds-${element("eu-north-1", count.index)}"
+    Name = "rds-${element(data.aws_availability_zones.available.names, count.index)}"
   }
 }
 

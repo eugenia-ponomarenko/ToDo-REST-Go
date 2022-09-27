@@ -16,6 +16,10 @@ provider "aws" {
   region  = "eu-north-1"
 }
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 resource "aws_iam_role" "ToDo_accessToRDS" {
   name = "ToDo-Access-RDS"
   assume_role_policy = <<EOF
