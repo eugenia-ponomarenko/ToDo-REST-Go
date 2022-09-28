@@ -15,17 +15,6 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
-resource "aws_subnet" "public_subnet" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "172.20.20.0/24"
-  availability_zone = data.aws_availability_zones.available.names[0]
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "ToDo-App-public-subnet"
-  }
-}
-
 resource "aws_route_table" "IG_route_table" {
   vpc_id = aws_vpc.main.id
 
@@ -39,30 +28,32 @@ resource "aws_route_table" "IG_route_table" {
   }
 }
 
+resource "aws_subnet" "public_subnet" {
+  count             = "${length(data.aws_availability_zones.available.names)}"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "172.20.${length(data.aws_availability_zones.available.names) + count.index}.0/24"
+  availability_zone = "${element(data.aws_availability_zones.available.names, count.index)}"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "ToDo-App-public-subnet-${element(data.aws_availability_zones.available.names, count.index)}"
+  }
+}
+
 resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
   depends_on = [
     aws_subnet.public_subnet,
     aws_route_table.IG_route_table,
   ]
-  subnet_id      = aws_subnet.public_subnet.id
+  count          = "${length(data.aws_availability_zones.available.names)}"
+  subnet_id      = "${element(aws_subnet.public.*.id, count.index)}"
   route_table_id = aws_route_table.IG_route_table.id
-}
-
-resource "aws_subnet" "rds" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "172.20.21.0/24"
-  map_public_ip_on_launch = true
-  availability_zone       = data.aws_availability_zones.available.names[1]
-
-  tags = {
-    Name = "ToDo-DB-subnet"
-  }
 }
 
 resource "aws_db_subnet_group" "default" {
   name        = "todo-db-subnet-group"
   description = "Terraform example RDS subnet group"
-  subnet_ids  = [aws_subnet.rds.id, aws_subnet.public_subnet.id]
+  subnet_ids  = ["${aws_subnet.rds.*.id}"]
 
   tags = {
     Name = "ToDo-DB-subnet-group"
