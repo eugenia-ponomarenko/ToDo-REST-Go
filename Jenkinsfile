@@ -8,8 +8,6 @@ pipeline {
         registry = "eugenia1p/todo_rest"
         registryCredential = 'dockerHub' 
         DB_PASSWORD = credentials('db_password')
-        Public_IP = ''
-        dockerImage = ''
     }
     
     stages {
@@ -20,33 +18,22 @@ pipeline {
                     sh '''
                     cd ./Terraform 
                     terraform init
-                    terraform apply --auto-approve
+                    terraform apply -var db_password="$DB_PASSWORD" --auto-approve -no-color
                     '''
                 }
             }
         }
-        
-        stage('Add Public IP to Ansible config and change localhost to remote public IP'){
+
+        stage('Migrate DB schema'){
             steps{
                 script {
-                    sh '''
+                    env.DB_ENDPOINT = sh(returnStdout: true, script: '''
                     cd ./Terraform
-                    Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'`
-                    sed -i -e "s/Public_IP/$Public_IP/g" ../Ansible/inventory.yml
-                    sed -i -e "s/localhost/$Public_IP/g" ../docs/*
-                    sed -i -e "s/localhost/$Public_IP/g" ../cmd/main.go
-                    '''
-                }
-            }
-        }
-        
-        stage('Change image name and DB password in docker-compose.yml'){
-            steps{
-                script {
+                    terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/' | sed 's/:5432//g'
+                    ''').trim()
+                    
                     sh '''
-                    sed -i -e "s#image: eugenia1p/todo_go_rest#image: $registry#g" ./docker-compose.yml
-                    sed -i -e "s/DB_PASSWORD=qwerty/DB_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
-                    sed -i -e "s/POSTGRES_PASSWORD=qwerty/POSTGRES_PASSWORD=$DB_PASSWORD/g" ./docker-compose.yml
+                    migrate -path ./schema -database "postgres://postgres:$DB_PASSWORD@$DB_ENDPOINT:5432/postgres?sslmode=disable" up
                     '''
                 }
             }
@@ -55,6 +42,32 @@ pipeline {
         stage('Create .env'){
             steps {
                 sh 'echo "DB_PASSWORD=$DB_PASSWORD" >> .env'
+            }
+        }
+
+        stage('Change db host in configs to RDS Endpoint'){
+            steps{
+                script {
+                    sh '''
+                    sed -i -e "s/host: db/host: $DB_ENDPOINT/g" ./configs/config.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Add Public IP to Ansible config and change localhost to remote public IP'){
+            steps{
+                script {
+                    env.Public_IP = sh(returnStdout: true, script: '''
+                    cd ./Terraform
+                    terraform output ec2_ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
+
+                    sh '''
+                    sed -i -e "s/localhost/$Public_IP/g" ./docs/*
+                    sed -i -e "s/localhost/$Public_IP/g" ./cmd/main.go
+                    '''
+                }
             }
         }
 
@@ -82,21 +95,27 @@ pipeline {
                 sh "docker rmi $registry:latest" 
             }     
         }
-        
-        stage('Ansible-playbook'){
-            steps{
-                ansiblePlaybook(credentialsId: 'todo_key_ssh', disableHostKeyChecking: true, installation: 'Ansible', inventory: 'Ansible/inventory.yml', playbook: 'Ansible/playbook.yaml')
-            }
-        }
-        
-        stage('Migrate DB'){
+
+        stage('Change image name in the Ansible playbook'){
             steps{
                 script {
                     sh '''
-                    cd ./Terraform
-                    Public_IP=`terraform output ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'`
-                    migrate -path ../schema -database "postgres://postgres:$DB_PASSWORD@$Public_IP:5432/postgres?sslmode=disable" up
+                    sed -i -e "s#image: eugenia1p/todo_rest#image: $registry#g" ./Ansible/playbook.yml
+                    sed -i -e "s#name: eugenia1p/todo_rest#name: $registry#g" ./Ansible/playbook.yml
                     '''
+                }
+            }
+        }
+        
+        stage('Ansible-playbook'){
+            steps{
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
+                 accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
+                    ansiblePlaybook(credentialsId: 'todo_app_ssh_eu_north_1',
+                                    disableHostKeyChecking: true, 
+                                    installation: 'Ansible', 
+                                    inventory: 'Ansible/aws_ec2.yml', 
+                                    playbook: 'Ansible/playbook.yml')
                 }
             }
         }

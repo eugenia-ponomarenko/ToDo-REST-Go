@@ -9,7 +9,6 @@
         update_cache: yes
         name: "{{ item }}"
       with_items:
-        - python3-distutils
         - python3-dev
         - python3-setuptools
         - python3-wheel
@@ -43,17 +42,22 @@
         group: "docker"
         append: yes
 
-    - name: Update apt and install docker-compose
-      apt:
-        name: docker-compose
-        state: latest
-        update_cache: true
+    - name: Remove container
+      docker_container:
+        name: todo-app
+        state: absent
+    
+    - name: Remove image
+      docker_image:
+        state: absent
+        name: eugenia1p/todo_rest
+        tag: latest
 
-    - name: Copy docker-compose from local to remote
-      copy:
-        src: ../docker-compose.yml
-        dest: ./docker-compose.yml
-
-    - name: Run container
-      shell:
-        cmd: "docker-compose -f ./docker-compose.yml up -d"
+    - name: Run a docker container
+      docker_container:
+        name: todo-app
+        image: eugenia1p/todo_rest:latest
+        restart: yes
+        restart_policy: always
+        ports:
+         - "8000:8000"
