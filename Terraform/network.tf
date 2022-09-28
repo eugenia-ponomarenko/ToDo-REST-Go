@@ -46,14 +46,14 @@ resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
     aws_route_table.IG_route_table,
   ]
   count          = "${length(data.aws_availability_zones.available.names)}"
-  subnet_id      = "${element(aws_subnet.public.*.id, count.index)}"
+  subnet_id      = "${element(aws_subnet.public_subnet.*.id, count.index)}"
   route_table_id = aws_route_table.IG_route_table.id
 }
 
 resource "aws_db_subnet_group" "default" {
   name        = "todo-db-subnet-group"
   description = "Terraform example RDS subnet group"
-  subnet_ids  = ["${aws_subnet.rds.*.id}"]
+  subnet_ids  = ["${aws_subnet.public_subnet.*.id}"]
 
   tags = {
     Name = "ToDo-DB-subnet-group"
