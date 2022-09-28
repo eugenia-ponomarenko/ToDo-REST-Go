@@ -56,8 +56,8 @@ make migrate
 
 > And also in **Terraform/main.tf** file you need to change the name of the bucket.
 
-- Create an IAM User with **Access key - Programmatic access** access type and **AmazonEC2FullAccess**, **AmazonRDSFullAccess** policy and created policy above.
-- Create EC2 key pair with **todo_key.pem** with **RSA** key pair type
+- Create an IAM User with **Access key - Programmatic access** access type and **AmazonEC2FullAccess**, **AmazonRDSFullAccess**, **IAMFullAccess** policies and created policy above.
+- Create EC2 key pair in **eu_north_1** region with **todo_key.pem** with **RSA** key pair type
 
 ## Jenkins configuration
 1. Install the following plugins:
