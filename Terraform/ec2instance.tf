@@ -5,6 +5,7 @@ resource "aws_instance" "u_web_server" {
   iam_instance_profile   = aws_iam_instance_profile.ToDo_instance_profile.name
   vpc_security_group_ids = [aws_security_group.EC2_SecurityGroup.id]
   subnet_id              = aws_subnet.public_subnet.0.id
+  monitoring             = true 
 
   tags = {
     Name = "ToDo_App"
