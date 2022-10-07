@@ -7,8 +7,15 @@ resource "aws_instance" "u_web_server" {
   subnet_id              = aws_subnet.public_subnet.0.id
   monitoring             = true 
 
+  ebs_block_device {
+    device_name           = "/dev/xvda"
+    volume_size           = "10"
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
   tags = {
     Name = "ToDo_App"
   }
 }
-
