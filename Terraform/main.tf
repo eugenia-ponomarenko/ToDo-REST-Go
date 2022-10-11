@@ -21,10 +21,6 @@ variable "db_password" {
   sensitive = true
 }
 
-variable "jenkins_public_ip" {
-  type = string
-}
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
