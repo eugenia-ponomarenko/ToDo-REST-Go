@@ -11,21 +11,11 @@ pipeline {
     }
     
     stages {
-        stage('Get own public IP'){
-            steps{
-                script {
-                    env.jenkins_public_ip = sh(returnStdout: true, script: 'curl ifconfig.co').trim()
-                }
-            }
-        }
-
-
         stage('Terraform apply'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
                     sh '''
-                    export TF_LOG=debug
                     cd ./Terraform 
                     terraform init
                     terraform apply -var db_password="$DB_PASSWORD" --auto-approve -no-color
