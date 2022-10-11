@@ -215,7 +215,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
         }
 }
 
-resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
+resource "aws_cloudwatch_metric_alarm" "rds_free_storage" {
     alarm_name                = "rds-free-storage-space"
     comparison_operator       = "GreaterThanOrEqualToThreshold"
     evaluation_periods        = "2"
