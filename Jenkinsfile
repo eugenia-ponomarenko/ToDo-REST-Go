@@ -11,6 +11,14 @@ pipeline {
     }
     
     stages {
+        stage('Get own public IP'){
+            steps{
+                script {
+                    env.jenkins_public_ip = sh(returnStdout: true, script: 'curl ifconfig.co').trim()
+                }
+            }
+        }
+        
         stage('Terraform apply'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
