@@ -37,7 +37,8 @@ resource "aws_security_group" "RDS_SecurityGroup" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["${aws_security_group.EC2_SecurityGroup.id}", "${var.jenkins_public_ip}/32"]
+    cidr_blocks = ["${var.jenkins_public_ip}/32"]
+    security_groups = ["${aws_security_group.EC2_SecurityGroup.id}"]
   }
 
   egress {
