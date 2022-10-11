@@ -28,7 +28,7 @@ pipeline {
                     export TF_LOG=debug
                     cd ./Terraform 
                     terraform init
-                    terraform apply -var db_password="$DB_PASSWORD" -var jenkins_public_ip="$jenkins_public_ip" --auto-approve -no-color
+                    terraform apply -var db_password="$DB_PASSWORD" --auto-approve -no-color
                     '''
                 }
             }
