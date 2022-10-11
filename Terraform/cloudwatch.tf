@@ -178,6 +178,7 @@ EOF
 
     depends_on = [
       aws_instance.u_web_server
+      aws_db_instance.ToDo_RDS_instance
     ]
 }
 
