@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_dashboard" "main" {
-  dashboard_name = "Basic-metrics-for-app-instance"
+  dashboard_name = "Basic-metrics-for-APP"
 
   dashboard_body = <<EOF
 {
@@ -22,7 +22,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         "period": 300,
         "stat": "Average",
         "region": "eu-north-1",
-        "title": "Instance CPU"
+        "title": "EC2 Instance CPU Utilization (in percent)"
       }
     },
     {
@@ -43,7 +43,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         "period": 300,
         "stat": "Average",
         "region": "eu-north-1",
-        "title": "Instance Network In (in bytes)"
+        "title": "EC2 Instance Network In (in bytes)"
       }
     },
     {
@@ -64,7 +64,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         "period": 300,
         "stat": "Average",
         "region": "eu-north-1",
-        "title": "Instance Network Out (in bytes)"
+        "title": "EC2 Instance Network Out (in bytes)"
       }
     },
     {
@@ -76,37 +76,100 @@ resource "aws_cloudwatch_dashboard" "main" {
       "properties": {
         "metrics": [
           [
-            "AWS/EC2",
-            "DiskWriteBytes",
-            "InstanceId",
-            "${aws_instance.u_web_server.id}"
+            "AWS/RDS",
+            "CPUUtilization",
+            "DBInstanceIdentifier",
+            "${aws_db_instance.ToDo_RDS_instance.id}"
           ]
         ],
         "period": 300,
         "stat": "Average",
         "region": "eu-north-1",
-        "title": "Instance Disk Write (in bytes)"
+        "title": "RDS Instance CPU Utilization (in percent)"
       }
     },
     {
       "type": "metric",
-      "x": 8,
+      "x": 0,
       "y": 0,
       "width": 8,
       "height": 5,
       "properties": {
         "metrics": [
           [
-            "AWS/EC2",
-            "DiskReadBytes",
-            "InstanceId",
-            "${aws_instance.u_web_server.id}"
+            "AWS/RDS",
+            "FreeableMemory",
+            "DBInstanceIdentifier",
+            "${aws_db_instance.ToDo_RDS_instance.id}"
           ]
         ],
         "period": 300,
         "stat": "Average",
         "region": "eu-north-1",
-        "title": "Instance Disk Read (in bytes)"
+        "title": "RDS Instance Freeable Memory (in bytes)"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 8,
+      "height": 5,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/RDS",
+            "FreeStorageSpace",
+            "DBInstanceIdentifier",
+            "${aws_db_instance.ToDo_RDS_instance.id}"
+          ]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "eu-north-1",
+        "title": "RDS Instance Free Storage Space (in bytes)"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 8,
+      "height": 5,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/RDS",
+            "ReadIOPS",
+            "DBInstanceIdentifier",
+            "${aws_db_instance.ToDo_RDS_instance.id}"
+          ]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "eu-north-1",
+        "title": "RDS Instance Read IOPS"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 8,
+      "height": 5,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/RDS",
+            "WriteIOPS",
+            "DBInstanceIdentifier",
+            "${aws_db_instance.ToDo_RDS_instance.id}"
+          ]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "eu-north-1",
+        "title": "RDS Instance Write IOPS"
       }
     }
   ]
@@ -132,5 +195,39 @@ resource "aws_cloudwatch_metric_alarm" "ec2_cpu" {
 
     dimensions = {
         InstanceId = aws_instance.u_web_server.id
+        }
+}
+
+resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
+    alarm_name                = "rds-cpu-utilization"
+    comparison_operator       = "GreaterThanOrEqualToThreshold"
+    evaluation_periods        = "2"
+    metric_name               = "CPUUtilization"
+    namespace                 = "AWS/RDS"
+    period                    = "120" #seconds
+    statistic                 = "Average"
+    threshold                 = "70"
+    alarm_description         = "ToDo-DB RDS Instance CPU Utilization Alarm"
+    insufficient_data_actions = []
+
+    dimensions = {
+        DBInstanceIdentifier = aws_db_instance.ToDo_RDS_instance.id
+        }
+}
+
+resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
+    alarm_name                = "rds-free-storage-space"
+    comparison_operator       = "GreaterThanOrEqualToThreshold"
+    evaluation_periods        = "2"
+    metric_name               = "FreeStorageSpace"
+    namespace                 = "AWS/RDS"
+    period                    = "120" #seconds
+    statistic                 = "Average"
+    threshold                 = "70"
+    alarm_description         = "ToDo-DB RDS Instance Free Storage Space Alarm"
+    insufficient_data_actions = []
+
+    dimensions = {
+        DBInstanceIdentifier = aws_db_instance.ToDo_RDS_instance.id
         }
 }
