@@ -223,7 +223,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_free_storage" {
     namespace                 = "AWS/RDS"
     period                    = "120" #seconds
     statistic                 = "Average"
-    threshold                 = "70"
+    threshold                 = "30"
     alarm_description         = "ToDo-DB RDS Instance Free Storage Space Alarm"
     insufficient_data_actions = []
 
