@@ -218,7 +218,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
 
 resource "aws_cloudwatch_metric_alarm" "rds_free_storage" {
     alarm_name                = "rds-free-storage-space"
-    comparison_operator       = "GreaterThanOrEqualToThreshold"
+    comparison_operator       = "LowerThanOrEqualToThreshold"
     evaluation_periods        = "2"
     metric_name               = "FreeStorageSpace"
     namespace                 = "AWS/RDS"
