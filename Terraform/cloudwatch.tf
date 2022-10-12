@@ -193,6 +193,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_cpu" {
     threshold                 = "70"
     alarm_description         = "ToDo-App EC2 Instance CPU Utilization Alarm"
     insufficient_data_actions = []
+    alarm_actions             = [aws_sns_topic.topic.arn]
 
     dimensions = {
         InstanceId = aws_instance.u_web_server.id
@@ -210,6 +211,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
     threshold                 = "70"
     alarm_description         = "ToDo-DB RDS Instance CPU Utilization Alarm"
     insufficient_data_actions = []
+    alarm_actions             = [aws_sns_topic.topic.arn]
 
     dimensions = {
         DBInstanceIdentifier = aws_db_instance.ToDo_RDS_instance.id
@@ -227,8 +229,20 @@ resource "aws_cloudwatch_metric_alarm" "rds_free_storage" {
     threshold                 = "30"
     alarm_description         = "ToDo-DB RDS Instance Free Storage Space Alarm"
     insufficient_data_actions = []
+    alarm_actions             = [aws_sns_topic.topic.arn]
 
     dimensions = {
         DBInstanceIdentifier = aws_db_instance.ToDo_RDS_instance.id
         }
+}
+
+
+resource "aws_sns_topic" "topic" {
+  name = "todo-topic"
+}
+
+resource "aws_sns_topic_subscription" "email-target" {
+  topic_arn = aws_sns_topic.topic.arn
+  protocol  = "email"
+  endpoint  = "eugeniaponomarenko01@gmail.com"
 }
