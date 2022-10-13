@@ -104,26 +104,36 @@ pipeline {
 
         stage('Get outputs from Terrafrom/lb_vpc_rds/'){
             steps{
-                env.lb_target_id = sh(returnStdout: true, script: '''
-                    cd ./Terraform/lb_vpc_rds/
-                    terraform output lb_target_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
-                    ''').trim()
-                env.ecs_sg_id = sh(returnStdout: true, script: '''
-                    cd ./Terraform/lb_vpc_rds/
-                    terraform output ecs_sg_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
-                    ''').trim()
-                env.public_subnet_0 = sh(returnStdout: true, script: '''
-                    cd ./Terraform/lb_vpc_rds/
-                    terraform output public_subnet_0 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
-                    ''').trim()
-                env.public_subnet_1 = sh(returnStdout: true, script: '''
-                    cd ./Terraform/lb_vpc_rds/
-                    terraform output public_subnet_1 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
-                    ''').trim()
-                env.public_subnet_2 = sh(returnStdout: true, script: '''
-                    cd ./Terraform/lb_vpc_rds/
-                    terraform output public_subnet_2 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
-                    ''').trim()
+                script{
+                    env.lb_target_id = sh(returnStdout: true, script: '''
+                        cd ./Terraform/lb_vpc_rds/
+                        terraform output lb_target_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                        ''').trim()
+                }
+                script{
+                    env.ecs_sg_id = sh(returnStdout: true, script: '''
+                        cd ./Terraform/lb_vpc_rds/
+                        terraform output ecs_sg_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                        ''').trim()
+                }
+                sript{
+                    env.public_subnet_0 = sh(returnStdout: true, script: '''
+                        cd ./Terraform/lb_vpc_rds/
+                        terraform output public_subnet_0 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                        ''').trim()
+                }
+                script{
+                    env.public_subnet_1 = sh(returnStdout: true, script: '''
+                        cd ./Terraform/lb_vpc_rds/
+                        terraform output public_subnet_1 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                        ''').trim()
+                }
+                script{
+                    env.public_subnet_2 = sh(returnStdout: true, script: '''
+                        cd ./Terraform/lb_vpc_rds/
+                        terraform output public_subnet_2 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                        ''').trim()
+                }
             }
         }
 
