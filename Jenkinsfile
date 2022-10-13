@@ -105,9 +105,9 @@ pipeline {
         stage('Get outputs from Terrafrom/lb_vpc_rds/'){
             steps{
                 script{
-                    env.lb_target_id = sh(returnStdout: true, script: '''
+                    env.lb_target_arn = sh(returnStdout: true, script: '''
                         cd ./Terraform/lb_vpc_rds
-                        terraform output lb_target_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                        terraform output lb_target_arn | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
                     env.ecs_sg_id = sh(returnStdout: true, script: '''
                         cd ./Terraform/lb_vpc_rds
@@ -137,7 +137,7 @@ pipeline {
                     cd ./Terraform/ecs/ 
                     terraform init -reconfigure
                     terraform apply \
-                    -var lb_target_id="$lb_target_id" \
+                    -var lb_target_arn="$lb_target_arn" \
                     -var ecs_sg_id="$ecs_sg_id" \
                     -var public_subnet_0="$public_subnet_0" \
                     -var public_subnet_1="$public_subnet_1" \
