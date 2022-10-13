@@ -42,7 +42,7 @@ resource "aws_ecs_service" "todo_app" {
   network_configuration {
     security_groups  = [var.ecs_sg_id]
     subnets          = [var.public_subnet_0, var.public_subnet_1, var.public_subnet_2]
-#     assign_public_ip = true
+    assign_public_ip = true
   }
 
   load_balancer {
