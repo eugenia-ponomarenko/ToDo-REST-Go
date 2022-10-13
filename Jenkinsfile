@@ -25,7 +25,7 @@ pipeline {
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
                     sh '''
                     cd ./Terraform/lb_vpc_rds/
-                    terraform init
+                    terraform init -reconfigure
                     terraform apply -var db_password="$DB_PASSWORD" -var jenkins_public_ip="$jenkins_public_ip" --auto-approve -no-color
                     '''
                 }
@@ -135,7 +135,7 @@ pipeline {
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
                     sh '''
                     cd ./Terraform/ecs/ 
-                    terraform init
+                    terraform init -reconfigure
                     terraform apply \
                     -var lb_target_id="$lb_target_id" \
                     -var ecs_sg_id="$ecs_sg_id" \
