@@ -24,7 +24,7 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
                     sh '''
-                    cd ./Terraform/lb_vpc_rds/ 
+                    cd ./Terraform/lb_vpc_rds/
                     terraform init
                     terraform apply -var db_password="$DB_PASSWORD" -var jenkins_public_ip="$jenkins_public_ip" --auto-approve -no-color
                     '''
@@ -36,7 +36,7 @@ pipeline {
             steps{
                 script {
                     env.DB_ENDPOINT = sh(returnStdout: true, script: '''
-                    cd ./Terraform/lb_vpc_rds/
+                    cd ./Terraform/lb_vpc_rds
                     terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/' | sed 's/:5432//g'
                     ''').trim()
                     
@@ -66,14 +66,14 @@ pipeline {
         stage('Change localhost to remote public IP'){
             steps{
                 script {
-                    env.Public_IP = sh(returnStdout: true, script: '''
-                    cd ./Terraform
+                    env.dns_name = sh(returnStdout: true, script: '''
+                    cd ./Terraform/lb_vpc_rds
                     terraform output lb_dns_name | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                     ''').trim()
 
                     sh '''
-                    sed -i -e "s/localhost/$Public_IP/g" ./docs/*
-                    sed -i -e "s/localhost/$Public_IP/g" ./cmd/main.go
+                    sed -i -e "s/localhost/$dns_name/g" ./docs/*
+                    sed -i -e "s/localhost/$dns_name/g" ./cmd/main.go
                     '''
                 }
             }
@@ -102,55 +102,27 @@ pipeline {
             }     
         }
 
-        stage('Get lb_target_id from Terrafrom/lb_vpc_rds/'){
+        stage('Get outputs from Terrafrom/lb_vpc_rds/'){
             steps{
                 script{
                     env.lb_target_id = sh(returnStdout: true, script: '''
-                        cd ./Terraform/lb_vpc_rds/
+                        cd ./Terraform/lb_vpc_rds
                         terraform output lb_target_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
-                }
-            }
-        }
-        
-        stage('Get ecs_sg_id from Terrafrom/lb_vpc_rds/'){
-            steps{
-                script{
                     env.ecs_sg_id = sh(returnStdout: true, script: '''
-                        cd ./Terraform/lb_vpc_rds/
+                        cd ./Terraform/lb_vpc_rds
                         terraform output ecs_sg_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
-                }
-            }
-        }
-        
-        stage('Get public_subnet_0 from Terrafrom/lb_vpc_rds/'){
-            steps{
-                sript{
                     env.public_subnet_0 = sh(returnStdout: true, script: '''
-                        cd ./Terraform/lb_vpc_rds/
+                        cd ./Terraform/lb_vpc_rds
                         terraform output public_subnet_0 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
-                }
-            }
-        }
-        
-        stage('Get public_subnet_1 from Terrafrom/lb_vpc_rds/'){
-            steps{
-                script{
                     env.public_subnet_1 = sh(returnStdout: true, script: '''
-                        cd ./Terraform/lb_vpc_rds/
+                        cd ./Terraform/lb_vpc_rds
                         terraform output public_subnet_1 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
-                }
-            }
-        }
-        
-        stage('Get public_subnet_2 from Terrafrom/lb_vpc_rds/'){
-            steps{
-                script{
                     env.public_subnet_2 = sh(returnStdout: true, script: '''
-                        cd ./Terraform/lb_vpc_rds/
+                        cd ./Terraform/lb_vpc_rds
                         terraform output public_subnet_2 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
                 }
@@ -177,6 +149,3 @@ pipeline {
         }
     }
 }
-
-
-// output vpc_id
