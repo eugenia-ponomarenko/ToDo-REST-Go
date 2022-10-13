@@ -19,7 +19,7 @@ pipeline {
             }
         }
 
-        stage('Terraform apply lb and vpc'){
+        stage('Terraform apply LB, VPC and RDS'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
@@ -129,7 +129,7 @@ pipeline {
             }
         }
 
-        stage('Terraform apply RDS and ECS'){
+        stage('Terraform apply ECS'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
