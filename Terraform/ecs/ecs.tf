@@ -33,11 +33,12 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_ecs_service" "todo_app" {
-  name            = "todo-app-service"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.main.arn
-  desired_count   = "1"
-  launch_type     = "FARGATE"
+  name             = "todo-app-service"
+  cluster          = aws_ecs_cluster.main.id
+  task_definition  = aws_ecs_task_definition.main.arn
+  desired_count    = "1"
+  launch_type      = "FARGATE"
+  assign_public_ip = true
 
   network_configuration {
     security_groups = [var.ecs_sg_id]
