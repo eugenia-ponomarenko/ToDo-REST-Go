@@ -1,7 +1,7 @@
 resource "aws_security_group" "ECS_SecurityGroup" {
   name        = "ToDo App SecurityGroup"
   description = "ToDo_APP. SecurityGroup for EC2 instance"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     description = "Flask port"
@@ -22,7 +22,7 @@ resource "aws_security_group" "ECS_SecurityGroup" {
 resource "aws_security_group" "RDS_SecurityGroup" {
   name        = "ToDo-DB-Security-Group"
   description = "ToDo. SecurityGroup for RDS instance"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     description = "PostgreSQL port"
