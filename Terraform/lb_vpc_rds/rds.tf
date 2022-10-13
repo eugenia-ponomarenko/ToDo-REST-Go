@@ -21,7 +21,7 @@ resource "aws_db_instance" "ToDo_RDS_instance" {
 resource "aws_db_subnet_group" "default" {
   name        = "todo-db-subnet-group"
   description = "Terraform example RDS subnet group"
-  subnet_ids  = [aws_subnet.public_subnet.0.id, aws_subnet.public_subnet.1.id, aws_subnet.public_subnet.2.id]
+  subnet_ids  = [aws_subnet.public.0.id, aws_subnet.public.1.id, aws_subnet.public.2.id]
 
   tags = {
     Name = "ToDo-DB-subnet-group"
