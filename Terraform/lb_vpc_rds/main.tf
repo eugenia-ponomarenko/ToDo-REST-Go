@@ -1,7 +1,7 @@
 terraform {
     backend "s3" {
     bucket = "onboarding-tf-backend"
-    key    = "todo/terrraform.tfstate"
+    key    = "todo-serverless-lb-vpc-rds/terrraform.tfstate"
     region = "eu-central-1"
   }
   required_providers {
