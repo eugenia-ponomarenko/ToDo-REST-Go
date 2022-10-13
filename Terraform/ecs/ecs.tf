@@ -38,11 +38,11 @@ resource "aws_ecs_service" "todo_app" {
   task_definition  = aws_ecs_task_definition.main.arn
   desired_count    = "1"
   launch_type      = "FARGATE"
-  assign_public_ip = true
 
   network_configuration {
-    security_groups = [var.ecs_sg_id]
-    subnets         = [var.public_subnet_0, var.public_subnet_1, var.public_subnet_2]
+    security_groups  = [var.ecs_sg_id]
+    subnets          = [var.public_subnet_0, var.public_subnet_1, var.public_subnet_2]
+    assign_public_ip = true
   }
 
   load_balancer {
