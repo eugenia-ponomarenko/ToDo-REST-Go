@@ -20,7 +20,7 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-variable "lb_target_id" {
+variable "lb_target_arn" {
   type = string
 }
 
