@@ -102,7 +102,7 @@ pipeline {
             }     
         }
 
-        stage('Get outputs from Terrafrom/lb_vpc_rds/'){
+        stage('Get lb_target_id from Terrafrom/lb_vpc_rds/'){
             steps{
                 script{
                     env.lb_target_id = sh(returnStdout: true, script: '''
@@ -110,24 +110,44 @@ pipeline {
                         terraform output lb_target_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
                 }
+            }
+        }
+        
+        stage('Get ecs_sg_id from Terrafrom/lb_vpc_rds/'){
+            steps{
                 script{
                     env.ecs_sg_id = sh(returnStdout: true, script: '''
                         cd ./Terraform/lb_vpc_rds/
                         terraform output ecs_sg_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
                 }
+            }
+        }
+        
+        stage('Get public_subnet_0 from Terrafrom/lb_vpc_rds/'){
+            steps{
                 sript{
                     env.public_subnet_0 = sh(returnStdout: true, script: '''
                         cd ./Terraform/lb_vpc_rds/
                         terraform output public_subnet_0 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
                 }
+            }
+        }
+        
+        stage('Get public_subnet_1 from Terrafrom/lb_vpc_rds/'){
+            steps{
                 script{
                     env.public_subnet_1 = sh(returnStdout: true, script: '''
                         cd ./Terraform/lb_vpc_rds/
                         terraform output public_subnet_1 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
                 }
+            }
+        }
+        
+        stage('Get public_subnet_2 from Terrafrom/lb_vpc_rds/'){
+            steps{
                 script{
                     env.public_subnet_2 = sh(returnStdout: true, script: '''
                         cd ./Terraform/lb_vpc_rds/
