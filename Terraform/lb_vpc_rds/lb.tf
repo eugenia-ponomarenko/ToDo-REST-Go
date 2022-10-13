@@ -1,7 +1,3 @@
-# add load balance
-# add endpoint output, id
-# create 2 stages in jenkinsfile with lb and others
-
 resource "aws_lb" "default" {
   name            = "todo-app-lb"
   subnets         = [for subnet in aws_subnet.public : subnet.id]
