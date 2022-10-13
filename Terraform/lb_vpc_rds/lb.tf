@@ -10,6 +10,16 @@ resource "aws_lb_target_group" "todo_app" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
+  
+  health_check {
+    path                = "swagger/index.html"
+    port                = "8000"
+    healthy_threshold   = 6
+    unhealthy_threshold = 2
+    timeout             = 2
+    interval            = 5
+    matcher             = "200"
+  }
 }
 
 resource "aws_lb_listener" "todo_app" {
