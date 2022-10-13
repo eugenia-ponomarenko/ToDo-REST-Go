@@ -12,7 +12,7 @@ resource "aws_lb_target_group" "todo_app" {
   target_type = "ip"
   
   health_check {
-    path                = "swagger/index.html"
+    path                = "/swagger/index.html"
     port                = "8000"
     healthy_threshold   = 6
     unhealthy_threshold = 2
