@@ -45,7 +45,7 @@ resource "aws_ecs_service" "todo_app" {
   }
 
   load_balancer {
-    target_group_arn = var.lb_target_id
+    target_group_arn = var.lb_target_arn
     container_name   = "todo-app"
     container_port   = 8000
   }
