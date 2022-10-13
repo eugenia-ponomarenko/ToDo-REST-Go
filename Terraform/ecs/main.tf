@@ -39,3 +39,7 @@ variable "public_subnet_1" {
 variable "public_subnet_2" {
   type = string
 }
+
+variable "sns_topic_arn" {
+  type = string
+}

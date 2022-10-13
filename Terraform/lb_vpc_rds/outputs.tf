@@ -26,3 +26,7 @@ output "public_subnet_1" {
 output "public_subnet_2" {
   value = aws_subnet.public.2.id
 }
+
+output "sns_topic_arn" {
+  value = aws_sns_topic.topic.arn
+}

@@ -125,6 +125,10 @@ pipeline {
                         cd ./Terraform/lb_vpc_rds
                         terraform output public_subnet_2 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                         ''').trim()
+                    env.sns_topic_arn = sh(returnStdout: true, script: '''
+                        cd ./Terraform/lb_vpc_rds
+                        terraform output sns_topic_arn | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                        ''').trim()
                 }
             }
         }
@@ -142,6 +146,7 @@ pipeline {
                     -var public_subnet_0="$public_subnet_0" \
                     -var public_subnet_1="$public_subnet_1" \
                     -var public_subnet_2="$public_subnet_2" \
+                    -var sns_topic_arn="$sns_topic_arn" \
                     --auto-approve -no-color
                     '''
                 }
