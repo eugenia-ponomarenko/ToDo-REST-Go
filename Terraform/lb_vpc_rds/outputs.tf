@@ -7,8 +7,8 @@ output "lb_dns_name" {
 }
 
 
-output "lb_target_id" {
-  value = aws_lb_target_group.todo_app.id
+output "lb_target_arn" {
+  value = aws_lb_target_group.todo_app.arn
 }
 
 output "ecs_sg_id" {
