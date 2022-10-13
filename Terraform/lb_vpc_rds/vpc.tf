@@ -7,7 +7,7 @@ resource "aws_vpc" "main" {
   }
 }
 
-resource "aws_subnet" "public_subnet" {
+resource "aws_subnet" "public" {
   count             = "${length(data.aws_availability_zones.available.names)}"
   vpc_id            = aws_vpc.main.id
   cidr_block        = "172.20.${length(data.aws_availability_zones.available.names) + count.index}.0/24"
@@ -40,12 +40,12 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
-resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
+resource "aws_route_table_association" "associate_routetable_to_public" {
   depends_on = [
-    aws_subnet.public_subnet,
+    aws_subnet.public,
     aws_route_table.IG_route_table,
   ]
   count          = "${length(data.aws_availability_zones.available.names)}"
-  subnet_id      = "${element(aws_subnet.public_subnet.*.id, count.index)}"
+  subnet_id      = "${element(aws_subnet.public.*.id, count.index)}"
   route_table_id = aws_route_table.IG_route_table.id
 }

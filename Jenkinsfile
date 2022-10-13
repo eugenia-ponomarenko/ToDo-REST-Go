@@ -18,13 +18,13 @@ pipeline {
                 }
             }
         }
-        
-        stage('Terraform apply'){
+
+        stage('Terraform apply lb and vpc'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
                     sh '''
-                    cd ./Terraform 
+                    cd ./Terraform/lb_vpc_rds/ 
                     terraform init
                     terraform apply -var db_password="$DB_PASSWORD" -var jenkins_public_ip="$jenkins_public_ip" --auto-approve -no-color
                     '''
@@ -36,7 +36,7 @@ pipeline {
             steps{
                 script {
                     env.DB_ENDPOINT = sh(returnStdout: true, script: '''
-                    cd ./Terraform
+                    cd ./Terraform/lb_vpc_rds/
                     terraform output db_endpoint | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/' | sed 's/:5432//g'
                     ''').trim()
                     
@@ -63,12 +63,12 @@ pipeline {
             }
         }
 
-        stage('Add Public IP to Ansible config and change localhost to remote public IP'){
+        stage('Change localhost to remote public IP'){
             steps{
                 script {
                     env.Public_IP = sh(returnStdout: true, script: '''
                     cd ./Terraform
-                    terraform output ec2_ip | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    terraform output lb_dns_name | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
                     ''').trim()
 
                     sh '''
@@ -81,51 +81,72 @@ pipeline {
 
         stage('Build executable for app'){
             steps {
-                sh 'env GOOS=linux GOARCH=amd64 go build -o todo-app ./cmd/main.go '
+                sh 'env GOOS=linux GOARCH=arm64 go build -o todo-app ./cmd/main.go '
             }
         }
 
         stage('Deploy image on DockerHub') {
             steps{
                 script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
-                    docker.withRegistry( '', registryCredential ) {             
-                        dockerImage.push()
-                        dockerImage.push('latest')
+                    dockerImage = docker.build registry
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push('arm64')
                     }
                 }
             }
         }
         
         stage('Remove Unused docker image') {       
-            steps{         
-                sh "docker rmi $registry:$BUILD_NUMBER"   
-                sh "docker rmi $registry:latest" 
+            steps{          
+                sh "docker rmi $registry:arm64" 
             }     
         }
 
-        stage('Change image name in the Ansible playbook'){
+        stage('Get outputs from Terrafrom/lb_vpc_rds/'){
             steps{
-                script {
-                    sh '''
-                    sed -i -e "s#image: eugenia1p/todo_rest#image: $registry#g" ./Ansible/playbook.yml
-                    sed -i -e "s#name: eugenia1p/todo_rest#name: $registry#g" ./Ansible/playbook.yml
-                    '''
-                }
+                env.lb_target_id = sh(returnStdout: true, script: '''
+                    cd ./Terraform/lb_vpc_rds/
+                    terraform output lb_target_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
+                env.ecs_sg_id = sh(returnStdout: true, script: '''
+                    cd ./Terraform/lb_vpc_rds/
+                    terraform output ecs_sg_id | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
+                env.public_subnet_0 = sh(returnStdout: true, script: '''
+                    cd ./Terraform/lb_vpc_rds/
+                    terraform output public_subnet_0 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
+                env.public_subnet_1 = sh(returnStdout: true, script: '''
+                    cd ./Terraform/lb_vpc_rds/
+                    terraform output public_subnet_1 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
+                env.public_subnet_2 = sh(returnStdout: true, script: '''
+                    cd ./Terraform/lb_vpc_rds/
+                    terraform output public_subnet_2 | sed 's/.\\(.*\\)/\\1/' | sed 's/\\(.*\\)./\\1/'
+                    ''').trim()
             }
         }
-        
-        stage('Ansible-playbook'){
+
+        stage('Terraform apply RDS and ECS'){
             steps{
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId:'AWS_EC2_S3',
                  accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY']]){
-                    ansiblePlaybook(credentialsId: 'todo_app_ssh_eu_north_1',
-                                    disableHostKeyChecking: true, 
-                                    installation: 'Ansible', 
-                                    inventory: 'Ansible/aws_ec2.yml', 
-                                    playbook: 'Ansible/playbook.yml')
+                    sh '''
+                    cd ./Terraform/ecs/ 
+                    terraform init
+                    terraform apply \
+                    -var lb_target_id="$lb_target_id" \
+                    -var ecs_sg_id="$ecs_sg_id" \
+                    -var public_subnet_0="$public_subnet_0" \
+                    -var public_subnet_1="$public_subnet_1" \
+                    -var public_subnet_2="$public_subnet_2" \
+                    --auto-approve -no-color
+                    '''
                 }
             }
         }
     }
 }
+
+
+// output vpc_id

@@ -16,6 +16,10 @@ provider "aws" {
   region  = "eu-north-1"
 }
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 variable "db_password" {
   type = string
   sensitive = true
@@ -23,8 +27,4 @@ variable "db_password" {
 
 variable "jenkins_public_ip" {
   type = string
-}
-
-data "aws_availability_zones" "available" {
-  state = "available"
 }

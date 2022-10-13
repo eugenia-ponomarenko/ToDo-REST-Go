@@ -9,7 +9,7 @@ resource "aws_iam_role" "ToDo_accessToRDS" {
         Effect = "Allow"
         Sid    = ""
         Principal = {
-          Service = "ec2.amazonaws.com"
+          Service = "ecs-tasks.amazonaws.com"
         }
       },
     ]
@@ -37,9 +37,4 @@ resource "aws_iam_policy_attachment" "attach_policy" {
   name       = "EC2-Access-to-RDS"
   roles      = ["${aws_iam_role.ToDo_accessToRDS.name}"]
   policy_arn = aws_iam_policy.ec2_to_rds.arn
-}
-
-resource "aws_iam_instance_profile" "ToDo_instance_profile" {
-  name = "ToDo_instance_profile"
-  role = aws_iam_role.ToDo_accessToRDS.name
 }

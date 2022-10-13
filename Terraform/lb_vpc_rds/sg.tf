@@ -1,7 +1,7 @@
-resource "aws_security_group" "EC2_SecurityGroup" {
+resource "aws_security_group" "ECS_SecurityGroup" {
   name        = "ToDo App SecurityGroup"
   description = "ToDo_APP. SecurityGroup for EC2 instance"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "Flask port"
@@ -9,14 +9,6 @@ resource "aws_security_group" "EC2_SecurityGroup" {
     to_port     = 8000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "port for Ansible connection"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["${var.jenkins_public_ip}/32"]
   }
 
   egress {
@@ -30,7 +22,7 @@ resource "aws_security_group" "EC2_SecurityGroup" {
 resource "aws_security_group" "RDS_SecurityGroup" {
   name        = "ToDo-DB-Security-Group"
   description = "ToDo. SecurityGroup for RDS instance"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "PostgreSQL port"
@@ -38,7 +30,7 @@ resource "aws_security_group" "RDS_SecurityGroup" {
     to_port     = 5432
     protocol    = "tcp"
     cidr_blocks = ["${var.jenkins_public_ip}/32"]
-    security_groups = ["${aws_security_group.EC2_SecurityGroup.id}"]
+    security_groups = ["${aws_security_group.ECS_SecurityGroup.id}"]
   }
 
   egress {
