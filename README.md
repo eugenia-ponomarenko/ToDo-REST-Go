@@ -5,6 +5,7 @@
     * [AWS configurations](#aws-configuration)
     * [Jenkins configuration](#jenkins-configuration)
     * [Possible errors](#possible-errors)
+* [Deploying on remote on ECS (serverless)](https://github.com/eugenia-ponomarenko/ToDo-REST-Go/blob/serverless/README.md)
 * [Deploying on premise with K8s](K8s/README.md)
 
 * [Python script to save your authentication bearer token in AWS SSM Parameter Store](#python-script-to-save-your-authentication-bearer-token-in-aws-ssm-parameter-store)
