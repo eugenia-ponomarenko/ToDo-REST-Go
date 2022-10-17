@@ -1,39 +1,25 @@
-# Table of Contents
-* [Deploying on premise](#deploying-on-localhost)
-* [Deploying on remote](#deploying-on-remote)
-    * [Required tools](#install-tools-that-gives-below)
-    * [AWS configurations](#aws-configuration)
-    * [Jenkins configuration](#jenkins-configuration)
-    * [Possible errors](#possible-errors)
-* [Deploying on premise with K8s](K8s/README.md)
+# Deploying on remote (serverless)
+## Table of Contents
+  * [Required tools](#install-tools-that-gives-below)
+  * [AWS configurations](#aws-configuration)
+  * [Jenkins configuration](#jenkins-configuration)
+  * [Possible errors](#possible-errors)
 
-* [Python script to save your authentication bearer token in AWS SSM Parameter Store](#python-script-to-save-your-authentication-bearer-token-in-aws-ssm-parameter-store)
 
-# Deploying on localhost
-### Install tools that gives below:
-- Docker, docker-compose
-- golang-migrate
-
-And execute the following command:
-```
-make run
-```
-
-In new terminal execute command below:
-```
-make migrate
-```
-
-# Deploying on remote
 ## Install tools that gives below:
 - Jenkins
 - Git
-- Terraform
-- Ansible
 - Golang-migrate
+- Golang
 - Docker
+- Terraform
 
 ## AWS configuration
+
+- Create a new S3 bucket for backend. And also in **Terraform/ecs/main.tf**  and **Terraform/lb_vpc_rds/main.tf** files you need to change the name of the bucket. And in the bucket create 2 folders:
+  - **todo-serverless-ecs**
+  - **todo-serverless-lb-vpc-rds**
+
 - Create an IAM policy with the following AWS IAM Statement with your bucket name:
 ```
 {
@@ -51,13 +37,17 @@ make migrate
     }
   ]
 }
-
 ```
 
-> And also in **Terraform/main.tf** file you need to change the name of the bucket.
+- Create an IAM User with **Access key - Programmatic access** access type and following policies:
+  - **AmazonEC2FullAccess**,
+  - **AmazonRDSFullAccess**,
+  - **IAMFullAccess**,
+  - **AmazonECS_FullAccess**,
+  - **CloudWatchFullAccess**, 
+  - **created policy above**.
 
-- Create an IAM User with **Access key - Programmatic access** access type and **AmazonEC2FullAccess**, **AmazonRDSFullAccess**, **IAMFullAccess**, **CloudWatchFullAccess** policies and created policy above.
-- Create EC2 key pair in **eu_north_1** region with **todo_key.pem** with **RSA** key pair type
+- Create EC2 key pair in **eu_north_1** region with **todo_key.pem** with **RSA** key pair type.
 
 ## Jenkins configuration
 1. Install the following plugins:
@@ -70,11 +60,11 @@ make migrate
 
 
 2. Add credentials in **_Manage Jenkins >> Security >> Manage Credentials_**
-    - AWS_EC2_S3 - as an **_AWS Credentials_** using the IAM User credentials that were created before
-    - todo_app_ssh_eu_north_1 - as a **_SSH Username with private key_** with **ubuntu** as a username and content of key pair file **todo_key.pem** as private key
-    - db_password - as a **_Secret file_** with password for DB
-    - github - as an **_Username with password_** (as a password use the **Personal Access Token**)
-    - dockerHub - as a **_Username with password_** (as a password use the **Access Token**)
+    - AWS_EC2_S3 - as an **_AWS Credentials_** using the IAM User credentials that were created before.
+    - todo_app_ssh_eu_north_1 - as a **_SSH Username with private key_** with **ubuntu** as a username and content of key pair file **todo_key.pem** as private key.
+    - db_password - as a **_Secret file_** with password for DB.
+    - github - as an **_Username with password_** (as a password use the **Personal Access Token**).
+    - dockerHub - as a **_Username with password_** (as a password use the **Access Token**).
 
 > Docker **Access Token** you can create here -> **_Acccount Settings >> Security >> Access Tokens_**
 >
@@ -84,8 +74,10 @@ make migrate
 
 <br>
 
-3. And finally, create **pipeline** job and add Jenkinsfile as a **_Pipeline script form SCM_**. using your **github** credentials saved as a Jenkins credentials
-![telegram-cloud-photo-size-2-5420578027445795973-y](https://user-images.githubusercontent.com/71873090/182135003-7ca4a601-760b-4436-a156-204e4f67f8ff.jpg)
+3. And finally, create **pipeline** job and add Jenkinsfile as a **_Pipeline script form SCM_**. using your **github** credentials saved as a Jenkins credentials.
+
+![jenkins job settings](https://user-images.githubusercontent.com/71873090/196144997-7408dc97-66df-420a-9f6c-e213acd3e918.jpg)
+
 
 ## Possible errors
 
@@ -130,41 +122,3 @@ Edit **_/usr/local/opt/jenkins-lts/homebrew.mxcl.jenkins-lts.plist_** file as fo
 ```
 
 <img width="582" alt="image" src="https://user-images.githubusercontent.com/71873090/182325011-cdaf2987-1c99-4b4f-b497-11a85944e9f9.png">
-
-<br>
-
-# Python script to save your Authentication Bearer token in AWS SSM Parameter Store
-- With this script you can put token as a parameter in AWS SSM Parameter Store
-- And get this parameter from the Parameter Store
-
-1. Create an IAM policy with the following permissions:
-```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:GetParameter",
-                "ssm:GetParameters",
-                "ssm:PutParameter"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-```
-2. Create an IAM User for boto3 with this policy and **Access key - Programmatic access** access type.
-3. Add credentials for **aws** as following:
-
-```
-> aws configure --profile ssm
-AWS Access Key ID [None]: AKIASA************
-AWS Secret Access Key [None]: jS+ZbKn***********************
-```
-
-4. Change an **url** value to your Public IP if you [deploy on remote](#deploying-on-remote) or leave the same one.
-    
-5. Execute the [aws-ssm.py](aws-ssm.py) script.
-
-> This script uses **sign-in** to get the token, so if you want to get a token from a specific account, don't forget to create it in the API first. You can do this from a link **url:8000/swagger/index.html** using the **sign-up** command in **auth** section.
